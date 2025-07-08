@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आर्थिक इन्फोग्राफिक्स डॅशबोर्ड</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .page { display: none; }
+        .page.active { display: block; }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #0A2463;
+            color: white;
+            border-bottom: 3px solid #F5D547;
+        }
+        .tab-button:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Styles for Race to Wealth Page */
+        #raceToWealthPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        #raceToWealthPage .chart-container, #theMagicPage .chart-container, #marketUncertaintyPage .chart-container, #mutualFundsExplainedPage .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #raceToWealthPage .chart-container {
+             max-width: 800px;
+             height: 300px;
+             max-height: 400px;
+        }
+         @media (min-width: 768px) {
+            #raceToWealthPage .chart-container {
+                height: 400px;
+            }
+        }
+        #raceToWealthPage .kpi-card {
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border-left: 5px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #raceToWealthPage .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        #raceToWealthPage .data-table-container {
+            overflow-x: auto;
+        }
+
+        /* Styles for FD vs Debt Funds Page */
+        #fdVsDebtPage {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FDFCDC;
+            color: #333333;
+        }
+        #fdVsDebtPage .text-custom-blue { color: #0081A7; }
+        #fdVsDebtPage .bg-custom-blue { background-color: #0081A7; }
+        #fdVsDebtPage .text-custom-teal { color: #00AFB9; }
+        #fdVsDebtPage .bg-custom-teal { background-color: #00AFB9; }
+        #fdVsDebtPage .text-custom-orange { color: #F07167; }
+        #fdVsDebtPage .bg-custom-orange { background-color: #F07167; }
+        #fdVsDebtPage .text-custom-peach { color: #FED9B7; }
+        #fdVsDebtPage .bg-custom-peach { background-color: #FED9B7; }
+        #fdVsDebtPage .chart-container {
+            max-width: 600px;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            #fdVsDebtPage .chart-container {
+                height: 400px;
+            }
+        }
+        #fdVsDebtPage .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #0081A7;
+        }
+
+        /* Styles for The Magic of Compounding Page */
+        #theMagicPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        #theMagicPage .chart-container {
+            max-width: 800px;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            #theMagicPage .chart-container {
+                height: 300px;
+                max-height: 60vh;
+            }
+        }
+        #theMagicPage .kpi-card {
+            background-color: #006494;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        #theMagicPage .kpi-value {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #FBAF00;
+        }
+        #theMagicPage .kpi-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        #theMagicPage .flowchart-step {
+            display: flex;
+            align-items: center;
+            position: relative;
+            min-height: 80px;
+        }
+        #theMagicPage .flowchart-step:not(:last-child)::after {
+            content: '▼';
+            position: absolute;
+            left: 30px;
+            bottom: -5px;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #0582CA;
+        }
+        #theMagicPage .flowchart-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        #theMagicPage .category-item {
+            border-left-width: 4px;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Styles for Market Uncertainty Page */
+        #marketUncertaintyPage {
+            font-family: 'Inter', sans-serif;
+        }
+        #marketUncertaintyPage .chart-container {
+            height: 50vh;
+            max-height: 550px;
+        }
+        
+        /* Styles for Mutual Funds Explained Page */
+        #mutualFundsExplainedPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        #mutualFundsExplainedPage .chart-container {
+            max-width: 500px;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            #mutualFundsExplainedPage .chart-container {
+                height: 350px;
+            }
+        }
+        #mutualFundsExplainedPage .flow-arrow {
+            color: #0A9396;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        #mutualFundsExplainedPage .kpi-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 5px solid #EE9B00;
+        }
+        #mutualFundsExplainedPage .content-card {
+             background-color: white;
+             border-radius: 0.75rem;
+             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+             padding: 2rem;
+             margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md sticky top-0 z-10">
+        <nav class="container mx-auto flex flex-wrap">
+            <button id="tab-mutualFundsExplained" class="tab-button flex-grow md:flex-1 py-4 px-6 font-semibold text-lg active">म्युच्युअल फंड्सचे स्पष्टीकरण</button>
+            <button id="tab-raceToWealth" class="tab-button flex-grow md:flex-1 py-4 px-6 font-semibold text-lg">संपत्तीची शर्यत</button>
+            <button id="tab-fdVsDebt" class="tab-button flex-grow md:flex-1 py-4 px-6 font-semibold text-lg">एफडी विरुद्ध डेट फंड</button>
+            <button id="tab-theMagic" class="tab-button flex-grow md:flex-1 py-4 px-6 font-semibold text-lg">चक्रवाढीची जादू</button>
+            <button id="tab-marketUncertainty" class="tab-button flex-grow md:flex-1 py-4 px-6 font-semibold text-lg">बाजारातील अनिश्चितता</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page 1: Mutual Funds Explained -->
+        <div id="mutualFundsExplainedPage" class="page active">
+            <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+                <header class="text-center my-8 md:my-12">
+                    <h1 class="text-4xl md:text-6xl font-black text-[#005F73]">म्युच्युअल फंड्सचे स्पष्टीकरण</h1>
+                    <p class="text-lg md:text-xl text-gray-600 mt-4 max-w-3xl mx-auto">सामूहिक गुंतवणुकीद्वारे तुमचे पैसे तुमच्यासाठी कसे काम करतात हे समजून घेण्यासाठी तुमचे सोपे मार्गदर्शक.</p>
+                </header>
+                <main>
+                    <section class="content-card">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-3xl font-bold text-[#0A9396] mb-4">मूळ कल्पना काय आहे?</h2>
+                                <p class="mb-6 text-gray-600">स्वतः गुंतवणूक करणे कठीण असू शकते. अनेक वेगवेगळ्या कंपन्यांमध्ये शेअर्स खरेदी करण्यासाठी खूप पैशांची आवश्यकता असते. म्युच्युअल फंड अनेक लोकांकडून पैसे गोळा करून मोठ्या प्रमाणावर गुंतवणूक करून ही समस्या सोडवतो. याला आर्थिक सांघिक कार्य समजा.</p>
+                                <div class="p-6 bg-blue-50 rounded-lg">
+                                     <h3 class="font-bold text-lg text-[#005F73] mb-2">थोडक्यात प्रक्रिया</h3>
+                                     <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                                        <div class="text-center">
+                                            <div class="text-4xl">🧑‍🤝‍🧑</div>
+                                            <p class="font-semibold">गुंतवणूकदार</p>
+                                        </div>
+                                        <div class="flow-arrow font-bold transform md:rotate-0 rotate-90">→</div>
+                                        <div class="text-center">
+                                            <div class="text-4xl">💰</div>
+                                            <p class="font-semibold">एकत्रित पैसे</p>
+                                        </div>
+                                        <div class="flow-arrow font-bold transform md:rotate-0 rotate-90">→</div>
+                                         <div class="text-center">
+                                            <div class="text-4xl">📈</div>
+                                            <p class="font-semibold">स्टॉक्स आणि बॉण्ड्स</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div>
+                                <div class="chart-container">
+                                    <canvas id="diversificationChart"></canvas>
+                                </div>
+                                 <p class="text-center text-sm text-gray-500 mt-2">म्युच्युअल फंड एकाच स्टॉकमध्ये गुंतवणूक करण्याच्या तुलनेत तुमची गुंतवणूक अनेक मालमत्तांमध्ये त्वरित विभागून धोका कमी करतो.</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="my-12">
+                         <h2 class="text-3xl font-bold text-[#0A9396] mb-6 text-center">मुख्य फायदे: हा एक स्मार्ट पर्याय का आहे</h2>
+                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="kpi-card">
+                                <div class="text-4xl mb-3">🛡️</div>
+                                <h3 class="text-xl font-bold text-[#005F73]">झटपट विविधीकरण</h3>
+                                <p class="text-gray-600 mt-1">तुमची सर्व अंडी एकाच टोपलीत ठेवू नका. तुमचे पैसे अनेक गुंतवणुकींमध्ये विभागले जातात, ज्यामुळे धोका कमी होतो.</p>
+                            </div>
+                             <div class="kpi-card">
+                                <div class="text-4xl mb-3">🧠</div>
+                                <h3 class="text-xl font-bold text-[#005F73]">व्यावसायिक व्यवस्थापन</h3>
+                                <p class="text-gray-600 mt-1">पूर्ण-वेळ तज्ञ तुमच्यासाठी पोर्टफोलिओचे संशोधन आणि व्यवस्थापन करतात. बाजार तज्ञ असण्याची गरज नाही.</p>
+                            </div>
+                             <div class="kpi-card">
+                                <div class="text-4xl mb-3">💵</div>
+                                <h3 class="text-xl font-bold text-[#005F73]">परवडण्याजोगे</h3>
+                                <p class="text-gray-600 mt-1">सिस्टिमॅटिक इन्व्हेस्टमेंट प्लॅन (SIP) द्वारे फक्त ₹500 पासून गुंतवणूक सुरू करा.</p>
+                            </div>
+                             <div class="kpi-card">
+                                 <div class="text-4xl mb-3">🔄</div>
+                                <h3 class="text-xl font-bold text-[#005F73]">उच्च तरलता</h3>
+                                <p class="text-gray-600 mt-1">चालू बाजार मूल्यावर (NAV) कोणत्याही व्यावसायिक दिवशी तुमचे फंड युनिट्स सहज खरेदी किंवा विक्री करा.</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="content-card">
+                        <h2 class="text-3xl font-bold text-[#0A9396] mb-6 text-center">पोर्टफोलिओमध्ये काय आहे? फंडांच्या प्रकारांची तुलना</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-center text-[#005F73] mb-2">धोका विरुद्ध संभाव्य परतावा</h3>
+                                <p class="text-center text-sm text-gray-500 mb-4">वेगवेगळ्या प्रकारचे फंड धोका आणि वाढीची वेगवेगळी पातळी देतात. इक्विटी फंड जास्त धोकादायक असतात पण जास्त संभाव्य परतावा देतात, तर डेट फंड अधिक सुरक्षित असतात.</p>
+                                <div class="chart-container" style="height: 400px; max-height: 450px;">
+                                    <canvas id="riskReturnChart"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-center text-[#005F73] mb-2">हायब्रीड फंड: एक संतुलित दृष्टीकोन</h3>
+                                 <p class="text-center text-sm text-gray-500 mb-4">हायब्रीड फंड धोका संतुलित करण्यासाठी स्टॉक्स (इक्विटी) आणि बॉण्ड्स (डेट) यांचे मिश्रण करतात. फंडाच्या उद्दिष्टानुसार मिश्रण बदलते.</p>
+                                <div class="chart-container" style="height: 400px; max-height: 450px;">
+                                    <canvas id="hybridAllocationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="content-card">
+                         <h2 class="text-3xl font-bold text-[#0A9396] mb-6 text-center">तुमचे पैसे कसे वाढतात</h2>
+                        <div class="grid grid-cols-1">
+                            <div class="max-w-xl mx-auto text-center">
+                                <h3 class="text-xl font-bold text-[#005F73] mb-2">भांडवली मूल्यवृद्धी (NAV वाढ)</h3>
+                                <p class="text-gray-600 mb-4">तुम्ही कमावण्याचा मुख्य मार्ग म्हणजे तुमच्या गुंतवणुकीच्या मूल्यात होणारी वाढ. नेट अॅसेट व्हॅल्यू (NAV) हे फंडाच्या एका युनिटची किंमत आहे. फंडाच्या गुंतवणुकीचे (स्टॉक्स, बॉण्ड्स) मूल्य वाढल्यामुळे, NAV वाढते. जेव्हा तुम्ही तुमचे युनिट्स जास्त किमतीला विकता तेव्हा तुम्हाला नफा होतो.</p>
+                                <div class="chart-container">
+                                    <canvas id="navGrowthChart"></canvas>
+                                </div>
+                                 <p class="text-center text-sm text-gray-500 mt-2">वेळेनुसार NAV ची उदाहरणात्मक वाढ.</p>
+                            </div>
+                        </div>
+                    </section>
+                      <section class="content-card">
+                        <h2 class="text-3xl font-bold text-[#0A9396] mb-6 text-center">महत्वाचे मुद्दे: काय जाणून घ्यावे</h2>
+                        <div class="max-w-2xl mx-auto">
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-2xl text-[#EE9B00] font-bold mr-4">!</span>
+                                    <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]">खर्च गुणोत्तर (Expense Ratio)</h4>
+                                        <p class="text-gray-600">फंडाद्वारे व्यावसायिक व्यवस्थापन आणि कामकाजाचा खर्च भागवण्यासाठी आकारले जाणारे एक लहान वार्षिक शुल्क (सामान्यतः 1-2%). हे तुमच्या गुंतवणुकीच्या मूल्यामधून आपोआप कापले जाते.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-2xl text-[#CA6702] font-bold mr-4">!</span>
+                                     <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]">बाजार धोका</h4>
+                                        <p class="text-gray-600">लक्षात ठेवा, परताव्याची हमी नाही. तुमच्या गुंतवणुकीचे मूल्य (NAV) बाजाराच्या कामगिरीनुसार बदलेल. दीर्घकालीन गुंतवणूक केल्याने या चढ-उतारांवर मात करण्यास मदत होते.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                     <span class="text-2xl text-[#BB3E03] font-bold mr-4">!</span>
+                                    <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]">एक्झिट लोड</h4>
+                                        <p class="text-gray-600">काही फंड तुम्ही तुमचे युनिट्स कमी कालावधीत (उदा. एक वर्ष) विकल्यास शुल्क आकारतात. हे अल्पकालीन सट्टेबाजीऐवजी दीर्घकालीन गुंतवणुकीला प्रोत्साहन देण्यासाठी आहे.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </main>
+                <footer class="text-center mt-12 py-6 border-t border-gray-200">
+                    <p class="text-gray-500">ही इन्फोग्राफिक केवळ शैक्षणिक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही. सर्व डेटा उदाहरणात्मक आहे.</p>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Page 2: Race to Wealth -->
+        <div id="raceToWealthPage" class="page">
+            <div class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-12">
+                    <h1 class="text-4xl md:text-6xl font-black text-[#0A2463] mb-2">३० वर्षांची संपत्तीची शर्यत</h1>
+                    <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">₹५०,००० वार्षिक गुंतवणुकीने तुम्हाला तीन दशकांत (आर्थिक वर्ष १९९६ - आर्थिक वर्ष २०२५) कुठे नेले असते याचे विश्लेषण.</p>
+                </header>
+                <div class="space-y-12">
+                    <section id="kpis">
+                        <h2 class="text-3xl font-bold text-center mb-8 text-[#0A2463]">अंतिम गणना: तुमचे पैसे कुठे वाढले असते</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                            <div class="kpi-card shadow-lg rounded-lg p-6 border-[#0A2463]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">निफ्टी-५०० (इक्विटी)</p>
+                                <p class="text-5xl font-extrabold text-[#0A2463] my-2">₹२.३३ कोटी</p>
+                                <p class="text-lg font-medium text-gray-700">सर्वाधिक वाढ</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-6 border-[#F5D547]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">सोने</p>
+                                <p class="text-5xl font-extrabold text-[#F5D547] my-2">₹१.३५ कोटी</p>
+                                <p class="text-lg font-medium text-gray-700">सर्वोत्तम कामगिरी करणारी कमोडिटी</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-6 border-[#3E8989]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">पीपीएफ</p>
+                                <p class="text-5xl font-extrabold text-[#3E8989] my-2">₹६३.२ लाख</p>
+                                <p class="text-lg font-medium text-gray-700">स्थिर आणि सुरक्षित</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-6 border-[#dc3545]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">चांदी</p>
+                                <p class="text-5xl font-extrabold text-[#dc3545] my-2">₹९३.२ लाख</p>
+                                <p class="text-lg font-medium text-gray-700">सर्वाधिक अस्थिर</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-center mb-2 text-[#0A2463]">दीर्घकालीन वाढीचे इंजिन: CAGR</h2>
+                        <p class="text-md text-gray-600 text-center mb-6 max-w-2xl mx-auto">चक्रवाढ वार्षिक वाढ दर (CAGR) वेळेनुसार गुंतवणुकीचा खरा सरासरी परतावा दर्शवतो. इक्विटीने इतर मालमत्ता वर्गांना मागे टाकले आहे, ज्यामुळे संपत्ती निर्मितीसाठी त्यांची शक्ती दिसून येते.</p>
+                        <div class="chart-container">
+                            <canvas id="cagrChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-center mb-2 text-[#0A2463]">अस्थिर प्रवास: वार्षिक परतावा</h2>
+                        <p class="text-md text-gray-600 text-center mb-6 max-w-2xl mx-auto">हा चार्ट महागाईच्या स्थिर वाढीच्या तुलनेत प्रमुख मालमत्ता वर्गांच्या अशांत प्रवासाचे चित्रण करतो. इक्विटी (निफ्टी-५००) तीव्र चढ-उतार दर्शवत असले तरी, त्यांचा दीर्घकालीन कल जोरदारपणे वरच्या दिशेने आहे. जेव्हा इक्विटी कमी होते, तेव्हा सोने अनेकदा वाढते, ज्यामुळे एक हेज म्हणून त्याची भूमिका दिसून येते.</p>
+                        <div class="chart-container">
+                            <canvas id="annualReturnsChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-center mb-2 text-[#0A2463]">धोका विरुद्ध परतावा: दुधारी तलवार</h2>
+                        <p class="text-md text-gray-600 text-center mb-6 max-w-2xl mx-auto">उच्च परतावा अनेकदा उच्च धोक्यांसह येतो. हा चार्ट दाखवतो की प्रत्येक मालमत्ता किती वेळा वर्षातील सर्वोत्तम कामगिरी करणारी होती विरुद्ध सर्वात वाईट. चांदीचे प्रोफाइल धक्कादायक आहे—एक वारंवार विजेता, पण सर्वात वारंवार पराभूत होणारी, जी अत्यंत अस्थिरता दर्शवते.</p>
+                        <div class="chart-container">
+                            <canvas id="riskProfileChart"></canvas>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-3xl font-bold text-center mb-8 text-[#0A2463]">३० वर्षांतील गुंतवणुकीचे महत्त्वाचे धडे</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]">📈 धोका परतावा ठरवतो</h3><p class="text-gray-700">सर्वाधिक दीर्घकालीन संपत्ती इक्विटीमध्ये तयार झाली, ज्यात सर्वात लक्षणीय अल्प-मुदतीची घट झाली. उच्च वाढीसाठी अस्थिरता स्वीकारणे आवश्यक आहे.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]">⏳ वेळ तुमचा मित्र आहे</h3><p class="text-gray-700">३० वर्षांहून अधिक काळात, उच्च-वाढीच्या मालमत्तेतील चक्रवाढीची शक्ती अल्प-मुदतीच्या बाजारातील गोंगाट शांत करते. बाजाराला वेळ देण्यापेक्षा गुंतून राहणे अधिक महत्त्वाचे आहे.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]">🛡️ विविधीकरण महत्त्वाचे आहे</h3><p class="text-gray-700">कोणतीही एक मालमत्ता दरवर्षी जिंकत नाही. जेव्हा इक्विटी घसरली, तेव्हा सोने अनेकदा वाढले. एक वैविध्यपूर्ण पोर्टफोलिओ कोणत्याही एका मालमत्ता वर्गातील घसरणीपासून संरक्षण देऊ शकतो.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]">💰 जिंकण्यासाठी महागाईवर मात करा</h3><p class="text-gray-700">तुमची संपत्ती खऱ्या अर्थाने वाढवण्यासाठी, तुमच्या गुंतवणुकीने सातत्याने महागाईपेक्षा (सरासरी ६.३%) जास्त कमाई करणे आवश्यक आहे. इक्विटी आणि सोन्याने हे साध्य केले आहे, तर निश्चित उत्पन्नाला अनेकदा असे करण्यात अडचण आली आहे.</p></div>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-center mb-2 text-[#0A2463]">तपशीलवार वर्ष-दर-वर्ष कामगिरी डेटा</h2>
+                        <p class="text-md text-gray-600 text-center mb-6 max-w-2xl mx-auto">खालील तक्ता या पृष्ठावरील विश्लेषण आणि व्हिज्युअलायझेशनसाठी वापरलेला कच्चा वार्षिक परतावा डेटा प्रदान करतो.</p>
+                        <div class="data-table-container rounded-lg border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100"><tr><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">वर्ष</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">पीपीएफ (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">एफडी (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">सोने (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">चांदी (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">सेन्सेक्स (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">निफ्टी-५०० (%)</th><th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">महागाई (%)</th></tr></thead><tbody class="bg-white divide-y divide-gray-200" id="dataTableBody"></tbody></table>
+                        </div>
+                    </section>
+                </div>
+                <footer class="text-center mt-12 pt-8 border-t border-gray-300"><p class="text-gray-500 text-sm">डेटा स्रोत: अंतर्गत संशोधन आणि विश्लेषण - जिओजित इनसाइट्स. FY % बदल: मार्च सरासरी / दरांवर. एफडी: मागील वर्ष, महागाई: FY '25, फेब्रुवारी. सर्व मूल्ये कर आणि व्यवहार खर्च वगळून, जर असतील तर. दरवर्षी ₹५०,००० ची गुंतवणूक (३० वर्षांसाठी, FY '96 पासून). गुंतवलेली रक्कम: ₹१५ लाख.</p><p class="text-gray-500 text-sm mt-2">ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही. भूतकाळातील कामगिरी भविष्यात पुन्हा होईलच असे नाही.</p></footer>
+            </div>
+        </div>
+
+        <!-- Page 3: FD vs Debt Funds -->
+        <div id="fdVsDebtPage" class="page">
+            <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+                <header class="text-center my-12">
+                    <h1 class="text-4xl md:text-6xl font-bold text-custom-blue mb-4">मुदत ठेव (FD) विरुद्ध डेट फंड</h1>
+                    <p class="text-xl md:text-2xl text-custom-teal font-semibold">तुमच्या बचतीसाठी योग्य मार्ग निवडणे: अंदाजित सुरक्षा की बाजाराशी निगडीत वाढ?</p>
+                </header>
+                <section class="grid grid-cols-1 md:grid-cols-2 gap-8 my-16">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-l-8 border-custom-blue"><h2 class="text-3xl font-bold text-custom-blue mb-4">मुदत ठेव (FD) म्हणजे काय? 🛡️</h2><p class="text-lg">एफडी ही एक सरळ गुंतवणूक आहे जिथे तुम्ही बँकेला एका निश्चित कालावधीसाठी पूर्व-संमत व्याजदराने पैसे देता. ज्या गुंतवणूकदारांचे मुख्य प्राधान्य त्यांचे भांडवल सुरक्षित ठेवणे आहे, त्यांच्यासाठी हा एक उत्तम पर्याय आहे.</p><div class="mt-6 text-center bg-custom-peach text-custom-blue p-4 rounded-lg"><span class="text-5xl font-bold">₹५ लाख</span><p class="font-semibold">DICGC द्वारे प्रति ठेवीदार, प्रति बँक विमा संरक्षण.</p></div></div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-l-8 border-custom-teal"><h2 class="text-3xl font-bold text-custom-teal mb-4">डेट म्युच्युअल फंड म्हणजे काय? 📈</h2><p class="text-lg">डेट फंड अनेक गुंतवणूकदारांकडून पैसे गोळा करून सरकारी बॉण्ड्स आणि कॉर्पोरेट डेट सारख्या निश्चित-उत्पन्न सिक्युरिटीजच्या वैविध्यपूर्ण पोर्टफोलिओमध्ये गुंतवणूक करतो. परतावा बाजाराच्या कामगिरीशी निगडीत असतो, ज्यामुळे उच्च वाढीची क्षमता मिळते.</p><div class="mt-6 text-center bg-custom-peach text-custom-blue p-4 rounded-lg"><span class="text-5xl font-bold">वैविध्यपूर्ण</span><p class="font-semibold">व्यावसायिक फंड व्यवस्थापकाद्वारे व्यवस्थापित पोर्टफोलिओ.</p></div></div>
+                </section>
+                <section class="my-16 bg-white p-8 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-8">धोका विरुद्ध संभाव्य परतावा: एक दृश्य तुलना</h2>
+                    <p class="text-lg text-center mb-8 max-w-3xl mx-auto">हा चार्ट एफडीच्या सामान्य वार्षिक परताव्याच्या श्रेणीची विविध प्रकारच्या डेट फंडांशी तुलना करतो. एफडी निश्चित, अंदाजित परतावा देत असताना, डेट फंड धोका आणि परताव्याचे एक विस्तृत स्पेक्ट्रम प्रदान करतात. डेट फंडांमधील उच्च संभाव्य परतावा उच्च बाजाराशी निगडीत धोक्यांसह येतो.</p>
+                    <div class="chart-container"><canvas id="returnComparisonChart"></canvas></div>
+                </section>
+                <section class="my-16">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-12">मुख्य धोके समजून घेणे</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg"><h3 class="text-2xl font-bold text-custom-orange mb-4">डेट फंड: क्रेडिट धोका</h3><p class="text-lg mb-6">क्रेडिट धोका म्हणजे बॉण्ड जारीकर्ता पेमेंटमध्ये डिफॉल्ट होण्याची शक्यता. फंड व्यवस्थापक वेगवेगळ्या क्रेडिट रेटिंग असलेल्या सिक्युरिटीजमध्ये वैविध्य आणून हे कमी करतात. 'AAA' रेट केलेल्या बॉण्ड्समध्ये जास्त वाटप अधिक पुराणमतवादी, कमी-धोक्याचा पोर्टफोलिओ दर्शवते.</p><div class="chart-container h-80 max-h-80"><canvas id="creditRiskChart"></canvas></div></div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg"><h3 class="text-2xl font-bold text-custom-orange mb-4">डेट फंड: व्याजदर धोका</h3><p class="text-lg mb-6">व्याजदर आणि बॉण्डच्या किमती विरुद्ध दिशांना जातात. जेव्हा आरबीआय दर वाढवते, तेव्हा विद्यमान बॉण्ड्सची किंमत (आणि त्यामुळे फंडाची एनएव्ही) कमी होते. हा चार्ट व्यस्त संबंध दर्शवतो, जो डेट फंड गुंतवणूकदारांसाठी एक महत्त्वाचा धोका आहे.</p><div class="chart-container h-80 max-h-80"><canvas id="interestRateRiskChart"></canvas></div></div>
+                    </div>
+                </section>
+                <section class="my-16 bg-white p-8 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-8">कर आकारणीची लढाई (एप्रिल २०२३ नंतर)</h2>
+                    <p class="text-lg text-center mb-10 max-w-3xl mx-auto">कर कायद्यांमधील एका महत्त्वपूर्ण बदलाने एफडी आणि डेट फंडांमधील स्पर्धा समान पातळीवर आणली आहे. १ एप्रिल २०२३ नंतर केलेल्या गुंतवणुकीसाठी, नफ्यावरील कर आकारणी आता समान आहे, ज्यामुळे डेट फंडांना मिळणारा पूर्वीचा दीर्घकालीन कर फायदा काढून टाकला गेला आहे.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-start md:items-center gap-8">
+                        <div class="w-full md:w-1/2 flex flex-col items-center"><div class="p-4 bg-custom-blue text-white rounded-lg font-bold text-xl mb-4">एफडी व्याज</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-gray-200 text-custom-dark rounded-lg text-center my-4">तुमच्या एकूण उत्पन्नात जोडले जाते</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-custom-orange text-white rounded-lg font-bold text-xl mt-4">तुमच्या स्लॅब दराने कर आकारला जातो</div></div>
+                        <div class="w-full md:w-1/2 flex flex-col items-center"><div class="p-4 bg-custom-teal text-white rounded-lg font-bold text-xl mb-4">डेट फंड नफा</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-gray-200 text-custom-dark rounded-lg text-center my-4">तुमच्या एकूण उत्पन्नात जोडले जाते</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-custom-orange text-white rounded-lg font-bold text-xl mt-4">तुमच्या स्लॅब दराने कर आकारला जातो</div></div>
+                    </div>
+                </section>
+                <section class="my-16">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-12">तरलता: तुमचे पैसे मिळवणे</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg text-center"><span class="text-6xl mb-4 block">🔒</span><h3 class="text-2xl font-bold text-custom-blue mb-4">मुदत ठेव (Fixed Deposit)</h3><p class="text-lg">तुम्ही लवकर पैसे काढू शकता, परंतु बँका दंड आकारतात (सामान्यतः ०.५% ते १.०%), ज्यामुळे तुमची कमाई कमी होते. कर-बचत एफडी ५ वर्षांसाठी लॉक असतात.</p></div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg text-center"><span class="text-6xl mb-4 block">🚪</span><h3 class="text-2xl font-bold text-custom-teal mb-4">डेट म्युच्युअल फंड</h3><p class="text-lg">अत्यंत तरल. तुम्ही कोणत्याही व्यावसायिक दिवशी पैसे काढू शकता. काही फंडांमध्ये लहान एक्झिट लोड कालावधी असू शकतो, परंतु अनेकांमध्ये (लिक्विड फंडांसारखे) नसतो.</p></div>
+                    </div>
+                </section>
+                <section class="my-16 bg-custom-blue text-white p-8 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold text-center mb-8">ज्येष्ठ नागरिकांवर लक्ष केंद्रित: SWP चा फायदा</h2>
+                    <p class="text-lg text-center mb-10 max-w-3xl mx-auto">निवृत्तांसाठी, डेट फंडांमधील सिस्टिमॅटिक विथड्रॉवल प्लॅन (SWP) नियमित, पेन्शनसारखा उत्पन्न प्रवाह तयार करण्याचा एक शक्तिशाली मार्ग प्रदान करतो. हे एफडीच्या निश्चित व्याज पेमेंटपेक्षा अधिक लवचिकता प्रदान करते आणि तुमच्या गरजेनुसार सानुकूलित केले जाऊ शकते.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+                        <div class="p-6 bg-custom-teal rounded-lg font-bold text-xl">तुमचा एकरकमी<br>निवृत्ती निधी</div><div class="flow-arrow text-white transform md:rotate-0 rotate-90">➡️</div>
+                        <div class="p-6 bg-custom-teal rounded-lg font-bold text-xl">कमी-धोक्याच्या डेट फंडात<br>गुंतवणूक</div><div class="flow-arrow text-white transform md:rotate-0 rotate-90">➡️</div>
+                        <div class="p-6 bg-custom-orange rounded-lg font-bold text-xl">निश्चित मासिक<br>पेआउट (SWP)</div>
+                    </div>
+                </section>
+                
+                <section class="my-16 bg-white p-8 rounded-xl shadow-lg">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-8">SWP कॅल्क्युलेटर: तुम्ही किती पैसे काढू शकता?</h2>
+                    <p class="text-lg text-center mb-10 max-w-3xl mx-auto">हे कॅल्क्युलेशन दाखवते की <strong>₹१ कोटी</strong> चा निधी किती मासिक उत्पन्न निर्माण करू शकतो, असे गृहीत धरून की महागाईचा सामना करण्यासाठी काढण्याची रक्कम दरवर्षी <strong>६%</strong> ने वाढवली जाते. आम्ही दरमहा <strong>₹५०,०००</strong> च्या सुरुवातीच्या काढण्याने सुरुवात करू (वार्षिक ६% दर).</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div>
+                            <h3 class="text-2xl font-bold text-custom-blue mb-4">परिस्थिती १: पुराणमतवादी वाढ (७% परतावा)</h3>
+                            <p class="mb-4">काढण्याच्या स्टेप-अप दरापेक्षा किंचित जास्त परताव्यासह, निधी कालांतराने कमी होतो.</p>
+                            <div id="swp-table-7" class="data-table-container rounded-lg border border-gray-200"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-custom-teal mb-4">परिस्थिती २: मध्यम वाढ (१०% परतावा)</h3>
+                            <p class="mb-4">स्टेप-अप दरापेक्षा लक्षणीयरीत्या जास्त परताव्यासह, पैसे काढल्यानंतरही निधी वाढतच राहतो.</p>
+                            <div id="swp-table-10" class="data-table-container rounded-lg border border-gray-200"></div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-center text-custom-blue mt-12 mb-4">कालांतराने निधीचे मूल्य</h3>
+                    <div class="chart-container h-96 max-h-96 mx-auto">
+                        <canvas id="swpProjectionChart"></canvas>
+                    </div>
+                </section>
+
+                <footer class="my-16">
+                    <h2 class="text-3xl font-bold text-center text-custom-blue mb-12">अंतिम निर्णय: तुमच्यासाठी कोणते योग्य आहे?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-t-8 border-custom-blue"><h3 class="text-2xl font-bold text-custom-blue mb-4">मुदत ठेव (FD) निवडा जर...</h3><ul class="text-lg space-y-2 list-disc list-inside"><li>तुमचे #१ प्राधान्य भांडवल सुरक्षा आहे.</li><li>तुम्हाला १००% अंदाजित, हमी परतावा हवा आहे.</li><li>तुम्ही एक सोपी, हाताळणी नसलेली गुंतवणूक पसंत करता.</li><li>तुम्ही अत्यंत धोका-विन्मुख आहात.</li></ul></div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg border-t-8 border-custom-teal"><h3 class="text-2xl font-bold text-custom-teal mb-4">डेट फंड निवडा जर...</h3><ul class="text-lg space-y-2 list-disc list-inside"><li>तुम्ही संभाव्यतः उच्च, बाजाराशी निगडीत परतावा शोधत आहात.</li><li>तुम्ही मध्यम धोके समजून घेता आणि स्वीकारता.</li><li>तुम्हाला उच्च तरलता आणि लवचिकता हवी आहे.</li><li>तुम्हाला SWP द्वारे नियमित उत्पन्न मिळवायचे आहे.</li></ul></div>
+                    </div>
+
+                    <div class="mt-16 bg-custom-blue text-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto text-center">
+                        <h2 class="text-3xl font-bold mb-4">तुम्हाला माहित आहे का?</h2>
+                        <p class="text-xl md:text-2xl leading-relaxed">
+                            बचत खात्यात <span class="font-extrabold text-custom-peach">₹१ लाख</span> ठेवल्यास <span class="font-extrabold text-white underline decoration-custom-peach">लिक्विड फंडांमधून</span> संभाव्य कमाई म्हणून दररोज <span class="font-extrabold text-custom-peach">₹१०</span> चे नुकसान होते.
+                        </p>
+                    </div>
+
+                    <p class="text-center mt-12 text-gray-500 text-sm">अस्वीकरण: ही इन्फोग्राफिक केवळ शैक्षणिक हेतूंसाठी आहे. म्युच्युअल फंड गुंतवणूक बाजाराच्या जोखमीच्या अधीन आहे. कृपया कोणतीही गुंतवणूक करण्यापूर्वी आर्थिक सल्लागाराचा सल्ला घ्या.</p>
+                </footer>
+            </div>
+        </div>
+        
+        <!-- Page 4: The Magic of Compounding -->
+        <div id="theMagicPage" class="page">
+             <div class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-12">
+                    <h1 class="text-4xl md:text-6xl font-black text-[#006494] mb-2">दीर्घकालीन गुंतवणुकीची जादू</h1>
+                    <p class="text-lg md:text-xl text-[#0582CA] max-w-3xl mx-auto">चक्रवाढीच्या शक्तीद्वारे एक लहान, सातत्यपूर्ण गुंतवणूक २५ वर्षांत कशी मोठी संपत्ती बनू शकते ते शोधा.</p>
+                </header>
+                <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div class="kpi-card bg-[#00A6FB]">
+                                <span class="kpi-value">₹५,०००</span>
+                                <span class="kpi-label">मासिक गुंतवणूक</span>
+                            </div>
+                            <div class="kpi-card bg-[#0582CA]">
+                                <span class="kpi-value">२५</span>
+                                <span class="kpi-label">वर्षांचा संयम</span>
+                            </div>
+                            <div class="kpi-card bg-[#006494]">
+                                <span class="kpi-value">~₹५ कोटी</span>
+                                <span class="kpi-label">अंतिम निधी</span>
+                            </div>
+                        </div>
+                         <p class="text-center mt-6 text-gray-600">ही इन्फोग्राफिक डेटाचे विश्लेषण करते ज्यात एका टॉप-परफॉर्मिंग फंडात ₹५,००० ची मासिक सिस्टिमॅटिक इन्व्हेस्टमेंट प्लॅन (SIP) जवळपास ₹५ कोटींमध्ये बदलते, जे २२.७% चा उल्लेखनीय वार्षिक परतावा दर्शवते.</p>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1">फंड कामगिरीची तुलना</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">अनेक फंडांनी चांगली कामगिरी केली असली तरी, काहींनी इतरांना मागे टाकले. खालील चार्ट विविध फंडांना २५ वर्षांनंतर त्यांच्या अंतिम निधीनुसार रँक करतो, ज्यामुळे परताव्यातील फरक स्पष्टपणे दिसून येतो. तुलनेसाठी निफ्टी ५० बेंचमार्क समाविष्ट आहे.</p>
+                        <div class="chart-container h-[500px] max-h-[60vh]">
+                            <canvas id="fundPerformanceChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1">तुमचा मार्ग निवडणे: श्रेणीनुसार SIP कामगिरी</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">वेगवेगळ्या फंड श्रेणी धोका आणि परताव्याचे वेगवेगळे स्तर देतात. ऐतिहासिकदृष्ट्या, स्मॉल-कॅप फंडांनी सर्वाधिक परतावा दिला आहे, परंतु त्यांच्यात सर्वाधिक अस्थिरता देखील आहे. यामुळे ते दीर्घकालीन दृष्टीकोन असलेल्या अनुभवी गुंतवणूकदारांसाठी योग्य ठरतात, तर नवीन गुंतवणूकदार लार्ज-कॅप फंडांच्या स्थिरतेला प्राधान्य देऊ शकतात.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div class="chart-container h-[450px]">
+                                <canvas id="categoryPerformanceChart"></canvas>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="category-item" style="border-color: #FD5900;"><h3 class="font-bold text-lg">स्मॉल कॅप (१७.६%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: पूरक, उच्च-धोका, दीर्घ-मुदती (७+ वर्षे), फक्त लहान वाटप.</p></div>
+                                <div class="category-item" style="border-color: #FBAF00;"><h3 class="font-bold text-lg">मिड कॅप (१६.१%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: पूरक; उच्च धोका-परतावा, ७+ वर्षे, उच्च अस्थिरता सहनशीलता.</p></div>
+                                <div class="category-item" style="border-color: #00A6FB;"><h3 class="font-bold text-lg">व्हॅल्यू ओरिएंटेड (१५.५%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; मूल्य शैली, लवचिक वाटप, किमान ५ वर्षे.</p></div>
+                                <div class="category-item" style="border-color: #0582CA;"><h3 class="font-bold text-lg">फ्लेक्सी कॅप (१४.७%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; कॅप्स/क्षेत्रांमध्ये लवचिक, किमान ५ वर्षे.</p></div>
+                                 <div class="category-item" style="border-color: #006494;"><h3 class="font-bold text-lg">लार्ज आणि मिड कॅप (१३.७%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; वैविध्यपूर्ण मार्केट-कॅप एक्सपोजर, किमान ५ वर्षे.</p></div>
+                                  <div class="category-item" style="border-color: #6b7280;"><h3 class="font-bold text-lg">लार्ज कॅप (१२.२%)</h3><p class="text-gray-600">यासाठी सर्वोत्तम: नवीन गुंतवणूकदार, कमी अस्थिरता सहनशीलता, किमान ५-वर्षांचा कालावधी.</p></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1">वाढीचे विश्लेषण</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">टॉप-परफॉर्मिंग निप्पॉन इंडिया ग्रोथ फंडावर लक्ष केंद्रित करून, हा चार्ट चक्रवाढीच्या घातांकीय शक्तीचे चित्रण करतो. ₹०.१५ कोटींची एकूण गुंतवलेली रक्कम २५ वर्षांत निर्माण झालेल्या प्रचंड वाढीपुढे लहान दिसते.</p>
+                        <div class="chart-container"><canvas id="sipGrowthChart"></canvas></div>
+                    </section>
+                    <aside class="bg-white p-6 rounded-lg shadow-lg flex flex-col justify-center">
+                        <h2 class="text-2xl font-bold text-center mb-4">संपत्ती निर्मितीसाठी सुवर्ण नियम</h2>
+                        <div class="space-y-4">
+                            <div class="flowchart-step"><div class="flowchart-icon bg-[#00A6FB]">📈</div><div class="ml-4"><h3 class="font-bold text-lg">लवकर सुरुवात करा</h3><p class="text-gray-600">तुमचे पैसे जितके जास्त वेळ तुमच्यासाठी काम करतील, तितका चक्रवाढीचा प्रभाव जास्त असेल.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#0582CA]">🗓️</div><div class="ml-4"><h3 class="font-bold text-lg">सातत्य ठेवा</h3><p class="text-gray-600">एक शिस्तबद्ध मासिक एसआयपी ऊन-पावसात स्थिरपणे संपत्ती निर्माण करते.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#006494]">🧘</div><div class="ml-4"><h3 class="font-bold text-lg">गुंतवणूक कायम ठेवा</h3><p class="text-gray-600">अल्पकालीन गोंगाट आणि बाजारातील घसरणीकडे दुर्लक्ष करा. संयमाला फळ मिळते.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#FBAF00]">🚀</div><div class="ml-4"><h3 class="font-bold text-lg">तुमची एसआयपी वाढवा</h3><p class="text-gray-600">तुमच्या संपत्तीच्या प्रवासाला गती देण्यासाठी तुमची गुंतवणूक वार्षिक वाढवा.</p></div></div>
+                        </div>
+                    </aside>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1">नियमित विरुद्ध स्टेप-अप एसआयपी: प्रवेगक प्रभाव</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">तुमची एसआयपी रक्कम दरवर्षी फक्त १०% ने वाढवणे ("स्टेप-अप एसआयपी") तुमच्या अंतिम संपत्तीवर प्रचंड परिणाम करू शकते. जास्त गुंतवणूक करताना, अंतिम निधी непропорционально मोठा वाढतो, ₹५ कोटींवरून संभाव्य ₹८ कोटींपर्यंत.</p>
+                        <div class="chart-container"><canvas id="stepUpComparisonChart"></canvas></div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1">अस्थिरतेला सामोरे जा: घसरणीला घाबरू नका</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">संपत्तीचा मार्ग कधीही सरळ नसतो. हा चार्ट टॉप फंडाने अनुभवलेल्या लक्षणीय तात्पुरत्या घसरणी (ड्रॉडౌन्स) दर्शवतो. या काळात गुंतवणूक कायम ठेवणे महत्त्वाचे आहे, कारण ते तुम्हाला कमी किमतीत जास्त युनिट्स खरेदी करण्याची संधी देते, ज्यामुळे दीर्घकालीन परतावा वाढतो.</p>
+                        <div class="chart-container"><canvas id="drawdownChart"></canvas></div>
+                    </section>
+                </main>
+                <footer class="text-center mt-12 text-gray-500 text-sm"><p>डेटा स्रोत: ACEMF आणि व्हॅल्यू रिसर्च, बिझनेसलाइनमध्ये प्रकाशित झाल्याप्रमाणे. परतावा ३१ डिसेंबर, २०२४ पर्यंत.</p><p>ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही.</p></footer>
+            </div>
+        </div>
+
+        <!-- Page 5: Market Uncertainty -->
+        <div id="marketUncertaintyPage" class="page bg-gray-100">
+             <main class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-12">
+                    <h1 class="text-4xl md:text-5xl font-black text-[#003f5c] mb-2">गुंतवणूक कायम ठेवण्याचे अढळ कारण</h1>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">आर्थिक वादळांमध्ये शिस्त, वेळ साधणे नव्हे, हीच दीर्घकालीन वाढीची गुरुकिल्ली का आहे यावर एक संवादात्मक डेटा कथा.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-[#003f5c] mb-2">अनिश्चिततेचा सततचा नाद</h2>
+                        <p class="text-gray-600 mb-6">बातम्यांचे मथळे अनेकदा आर्थिक अनिश्चिततेला एक अद्वितीय, अभूतपूर्व संकट म्हणून चित्रित करतात. तथापि, आर्थिक धोरण अनिश्चितता निर्देशांकावर नजर टाकल्यास असे दिसून येते की अस्थिरता ही जागतिक परिदृश्याची एक आवर्ती वैशिष्ट्य आहे. मोठ्या घटनांमुळे सातत्याने वाढ होते, परंतु बाजाराने नेहमीच जुळवून घेतले आहे आणि पुढे वाटचाल केली आहे.</p>
+                        <div class="chart-container"><canvas id="uncertaintyChart"></canvas></div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-[#dd5182] mb-2">भीतीची विनाशकारी किंमत</h2>
+                        <p class="text-gray-600 mb-6">जेव्हा अनिश्चितता वाढते, तेव्हा विकून सुरक्षिततेचा शोध घेणे ही नैसर्गिक प्रवृत्ती असते. 'बाजाराला वेळ देण्याचा' हा प्रयत्न अनेकदा विनाशकारी ठरतो, कारण बाजारातील सर्वोत्तम दिवस अनेकदा त्याच्या सर्वात वाईट दिवसांनंतर येतात. या काही महत्त्वाच्या पुनर्प्राप्ती दिवसांना चुकवल्यास दीर्घकालीन परतावा कमी होऊ शकतो, जसे की सेन्सेक्समध्ये ₹१ लाखाच्या गुंतवणुकीच्या १० वर्षांच्या वाढीवरून दिसून येते.</p>
+                        <div class="chart-container"><canvas id="marketTimingChart"></canvas></div>
+                    </section>
+                    <div class="bg-[#003f5c] text-white rounded-xl shadow-lg p-8 flex flex-col justify-center items-center text-center"><span class="text-5xl md:text-6xl font-black tracking-tighter">₹३.१७ लाख</span><span class="text-lg mt-2 font-semibold text-blue-200">पूर्णपणे गुंतवलेले राहिल्यास १० वर्षांनंतरचे मूल्य.</span></div>
+                    <div class="bg-[#dd5182] text-white rounded-xl shadow-lg p-8 flex flex-col justify-center items-center text-center"><span class="text-5xl md:text-6xl font-black tracking-tighter">₹१.४० लाख</span><span class="text-lg mt-2 font-semibold text-red-200">फक्त २० सर्वोत्तम दिवस चुकवल्यानंतरचे मूल्य.</span></div>
+                    <div class="bg-white rounded-xl shadow-lg p-8 flex flex-col justify-center items-center text-center"><span class="text-5xl md:text-6xl font-black tracking-tighter text-[#ff6e54]">५६%</span><span class="text-lg mt-2 font-semibold text-gray-600">२० दिवस चुकवल्यामुळे परताव्यातील संभाव्य नुकसान.</span></div>
+                     <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-[#ff6e54] mb-2">संकटात लवचिकता: मोठ्या घटनांनंतर बाजाराचा परतावा</h2>
+                        <p class="text-gray-600 mb-6">इतिहास दाखवतो की भू-राजकीय संकटाचे काळ, अस्वस्थ करणारे असले तरी, अनेकदा त्यानंतर बाजारात चांगली कामगिरी होते. खालील डेटा विविध मोठ्या घटनांपासून वार्षिक परतावा (CAGR) दर्शवतो. लक्षात घ्या की, सर्वत्र, बाजारांनी पुनर्प्राप्ती केली आहे आणि सकारात्मक परतावा दिला आहे, विशेषतः मिड आणि स्मॉल-कॅप विभागांमध्ये.</p>
+                        <div class="chart-container" style="height: 60vh; max-height: 700px;"><canvas id="eventReturnsChart"></canvas></div>
+                    </section>
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-[#955196] mb-2">वर्तणुकीतील तफावत: आपण चुका का करतो</h2>
+                        <p class="text-gray-600 mb-6">गुंतवणूकदाराची सुरळीत, रेषीय वाढीची अपेक्षा आणि अस्थिर बाजाराचे वास्तव यांच्यातील तफावत चुकीच्या निर्णयांना कारणीभूत ठरते. आपण उत्साहाच्या भरात जास्त किमतीला खरेदी करतो आणि दहशतीच्या भरात कमी किमतीला विकतो. वॉरन बफे यांनी उत्तम म्हटले आहे: "तुम्ही काय करत आहात हे माहित नसल्यामुळे धोका निर्माण होतो." ही तफावत समजून घेणे हे त्यावर मात करण्याचे पहिले पाऊल आहे.</p>
+                        <div class="chart-container"><canvas id="behaviouralGapChart"></canvas></div>
+                    </section>
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                        <h2 class="text-3xl font-bold text-[#003f5c] text-center mb-8">विजयी धोरण: एक शिस्तबद्ध मार्ग</h2>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="text-center p-4"><div class="bg-blue-100 text-[#003f5c] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">🗓️</div><h3 class="text-xl font-bold text-gray-800">अनिश्चितता स्वीकारा</h3><p class="text-gray-600">अस्थिरता हा गुंतवणुकीचा एक सामान्य भाग आहे हे स्वीकारा, तुमची रणनीती सोडून देण्याचे चिन्ह नाही.</p></div>
+                            <div class="text-gray-300 text-3xl font-light hidden md:block">→</div><div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-red-100 text-[#dd5182] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">🏃‍♂️</div><h3 class="text-xl font-bold text-gray-800">बाजाराला वेळ देण्याचा मोह टाळा</h3><p class="text-gray-600">डेटा सिद्ध करतो की उच्च आणि नीच पातळीचा अंदाज लावण्याचा प्रयत्न करणे हा एक हरणारा खेळ आहे. तो खेळू नका.</p></div>
+                            <div class="text-gray-300 text-3xl font-light hidden md:block">→</div><div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-purple-100 text-[#955196] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">⏳</div><h3 class="text-xl font-bold text-gray-800">शिस्तबद्ध रहा</h3><p class="text-gray-600">सर्वात शक्तिशाली साधन म्हणजे संयम. वेळ आणि चक्रवाढीला तुमच्यासाठी काम करू द्या.</p></div>
+                            <div class="text-gray-300 text-3xl font-light hidden md:block">→</div><div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-green-100 text-green-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">📈</div><h3 class="text-xl font-bold text-gray-800">वाढ साध्य करा</h3><p class="text-gray-600">मार्गावर टिकून राहून, तुम्ही बाजाराचा पूर्ण दीर्घकालीन परतावा मिळवण्यासाठी स्वतःला योग्य स्थितीत ठेवता.</p></div>
+                        </div>
+                    </section>
+                </div>
+                <footer class="text-center mt-12 text-sm text-gray-500"><p>डेटा स्रोत: बेकर, ब्लूम आणि डेव्हिस; सेन्सेक्स ऐतिहासिक डेटा; बजाज फिनसर्व्ह अॅसेट मॅनेजमेंट लिमिटेड.</p><p>ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही.</p></footer>
+            </main>
+        </div>
+    </main>
+
+    <script>
+        // Data for Race to Wealth
+        const financialData = {
+            labels: ['FY 96', 'FY 97', 'FY 98', 'FY 99', 'FY 00', 'FY 01', 'FY 02', 'FY 03', 'FY 04', 'FY 05', 'FY 06', 'FY 07', 'FY 08', 'FY 09', 'FY 10', 'FY 11', 'FY 12', 'FY 13', 'FY 14', 'FY 15', 'FY 16', 'FY 17', 'FY 18', 'FY 19', 'FY 20', 'FY 21', 'FY 22', 'FY 23', 'FY 24', 'FY 25'],
+            ppf: [12.0, 12.0, 12.0, 12.0, 11.0, 9.5, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.6, 8.8, 8.7, 8.7, 8.7, 8.0, 7.6, 8.0, 7.9, 7.1, 7.1, 7.1, 7.1, 7.1],
+            fd: [11.0, 12.0, 11.5, 11.3, 10.3, 9.5, 9.3, 8.0, 5.8, 5.3, 5.8, 6.5, 8.3, 8.6, 8.3, 6.8, 8.6, 8.9, 8.3, 8.6, 8.4, 7.5, 6.8, 6.5, 6.9, 6.2, 5.2, 5.3, 6.6, 6.9],
+            gold: [11.6, -7.9, -16.6, 8.4, 4.9, -6.0, 15.3, 10.4, 10.2, 4.6, 28.7, 16.3, 34.8, 20.6, 9.1, 25.4, 33.7, 6.0, 1.1, -12.3, 10.0, -0.1, 5.8, 5.3, 32.0, 5.6, 15.9, 11.1, 13.4, 33.2],
+            silver: [20.7, -0.7, -15.6, -8.8, 2.3, -8.0, 6.0, -0.1, 42.7, -2.8, 35.6, 32.9, 24.9, -8.9, 22.0, 101.2, 5.7, -4.5, -16.4, -19.1, 0.9, 12.3, -9.0, -0.8, 8.8, 59.4, 3.5, -2.6, 9.9, 33.9],
+            sensex: [-2.3, 13.1, 3.2, -1.4, 46.4, -26.8, -3.4, -10.1, 82.2, 21.6, 65.3, 20.2, 24.5, -42.4, 94.7, 8.2, -4.3, 11.8, 15.8, 32.9, -11.8, 19.7, 15.3, 14.4, -13.3, 57.2, 13.7, 5.1, 26.7, 4.2],
+            nifty500: [-16.2, 3.0, 1.4, 8.9, 94.9, -42.2, -0.4, -4.6, 105.7, 29.0, 55.7, 11.9, 27.7, -44.1, 102.7, 4.1, -3.4, 8.7, 12.6, 42.4, -10.5, 26.3, 16.4, 5.8, -16.8, 62.2, 17.1, 1.8, 39.9, 4.0],
+            inflation: [8.9, 10.0, 8.3, 8.9, 4.8, 2.5, 5.2, 4.1, 3.5, 4.2, 4.8, 6.7, 7.9, 8.0, 14.9, 8.8, 8.6, 11.4, 6.7, 6.3, 5.5, 2.6, 4.4, 7.7, 5.5, 5.7, 5.4, 5.8, 4.2, 2.6]
+        };
+        const cagrData = { labels: ['निफ्टी-५००', 'सेन्सेक्स', 'सोने', 'चांदी', 'पीपीएफ', 'एफडी'], values: [14.7, 13.7, 12.0, 10.1, 8.2, 7.4] };
+        const riskProfileData = { labels: ['पीपीएफ', 'एफडी', 'सोने', 'चांदी', 'सेन्सेक्स', 'निफ्टी-५००'], best: [0, 1, 8, 5, 5, 10], worst: [2, 0, 4, 10, 4, 6] };
+        
+        // Chart.js Global Config
+        const chartTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) { return label.join(' '); }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Chart Rendering Functions
+        let charts = {};
+        const renderCagrChart = () => {
+            if (charts.cagrChart) charts.cagrChart.destroy();
+            const ctx = document.getElementById('cagrChart').getContext('2d');
+            charts.cagrChart = new Chart(ctx, { type: 'bar', data: { labels: cagrData.labels, datasets: [{ label: 'CAGR (%)', data: cagrData.values, backgroundColor: ['#0A2463', '#1e4a8e', '#F5D547', '#C0C0C0', '#3E8989', '#6fb0af'], borderColor: '#ffffff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, ...chartTooltipOptions, scales: { y: { beginAtZero: true, title: { display: true, text: 'CAGR %' } } }, plugins: { ...chartTooltipOptions.plugins, legend: { display: false } } } });
+        };
+        const renderAnnualReturnsChart = () => {
+            if (charts.annualReturnsChart) charts.annualReturnsChart.destroy();
+            const ctx = document.getElementById('annualReturnsChart').getContext('2d');
+            charts.annualReturnsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: financialData.labels,
+                    datasets: [
+                        { label: 'निफ्टी-५००', data: financialData.nifty500, borderColor: '#0A2463', backgroundColor: 'rgba(10, 36, 99, 0.1)', fill: false, tension: 0.1 },
+                        { label: 'सोने', data: financialData.gold, borderColor: '#F5D547', backgroundColor: 'rgba(245, 213, 71, 0.1)', fill: false, tension: 0.1 },
+                        { label: 'चांदी', data: financialData.silver, borderColor: '#A9A9A9', backgroundColor: 'rgba(169, 169, 169, 0.1)', fill: false, tension: 0.1 },
+                        { label: 'पीपीएफ', data: financialData.ppf, borderColor: '#3E8989', backgroundColor: 'rgba(62, 137, 137, 0.1)', fill: false, tension: 0.1 },
+                        { label: 'एफडी', data: financialData.fd, borderColor: '#85C7F2', backgroundColor: 'rgba(133, 199, 242, 0.1)', fill: false, tension: 0.1 },
+                        { label: 'महागाई', data: financialData.inflation, borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.1)', fill: false, tension: 0.1, borderDash: [5, 5] }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, ...chartTooltipOptions, scales: { y: { title: { display: true, text: 'वार्षिक परतावा (%)' } } }, plugins: { ...chartTooltipOptions.plugins, legend: { position: 'top', } } }
+            });
+        };
+        const renderRiskProfileChart = () => {
+            if (charts.riskProfileChart) charts.riskProfileChart.destroy();
+            const ctx = document.getElementById('riskProfileChart').getContext('2d');
+            charts.riskProfileChart = new Chart(ctx, { type: 'bar', data: { labels: riskProfileData.labels, datasets: [ { label: 'सर्वोत्तम कामगिरी करणारी वर्षे', data: riskProfileData.best, backgroundColor: '#28a745', }, { label: 'सर्वात वाईट कामगिरी करणारी वर्षे', data: riskProfileData.worst, backgroundColor: '#dc3545', } ] }, options: { responsive: true, maintainAspectRatio: false, ...chartTooltipOptions, scales: { y: { beginAtZero: true, title: { display: true, text: 'वर्षांची संख्या' }, ticks: { stepSize: 2 } } }, plugins: { ...chartTooltipOptions.plugins, legend: { position: 'top', } } } });
+        };
+        const populateDataTable = () => {
+            const tableBody = document.getElementById('dataTableBody');
+            if (!tableBody) return;
+            let tableHTML = '';
+            financialData.labels.forEach((year, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                tableHTML += `<tr class="${rowClass}"><td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${year}</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.ppf[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.fd[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.gold[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.silver[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.sensex[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.nifty500[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.inflation[index].toFixed(1)}%</td></tr>`;
+            });
+            tableBody.innerHTML = tableHTML;
+        };
+
+        const calculateAndDisplaySWP = (containerId, returnRate) => {
+            let corpus = 10000000; // 1 Crore
+            const stepUp = 0.06; // 6%
+            let annualWithdrawal = 600000; // 50k * 12
+            
+            let tableHTML = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100"><tr><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">वर्ष</th><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">काढलेली रक्कम</th><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">अखेरचा निधी</th></tr></thead><tbody>`;
+            const corpusHistory = [];
+            const withdrawalHistory = [];
+
+            for (let year = 1; year <= 30; year++) {
+                if (corpus <= 0) {
+                    corpus = 0;
+                };
+                
+                if (year > 1) {
+                    annualWithdrawal *= (1 + stepUp);
+                }
+                withdrawalHistory.push(annualWithdrawal);
+                
+                const openingCorpus = corpus;
+                const returns = openingCorpus * returnRate;
+                corpus += returns;
+                corpus -= annualWithdrawal > corpus ? corpus : annualWithdrawal;
+                corpusHistory.push(corpus);
+
+                if (year <= 10) { // Display first 10 years in table
+                    const rowClass = year % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    tableHTML += `<tr class="${rowClass}"><td class="px-2 py-1.5 text-sm">${year}</td><td class="px-2 py-1.5 text-sm">₹${(annualWithdrawal / 100000).toFixed(2)}L</td><td class="px-2 py-1.5 text-sm">₹${(corpus / 100000).toFixed(2)}L</td></tr>`;
+                }
+            }
+            tableHTML += '</tbody></table>';
+            document.getElementById(containerId).innerHTML = tableHTML;
+            return { corpusHistory, withdrawalHistory };
+        };
+
+        const renderSwpProjectionChart = () => {
+            if (charts.swpProjectionChart) charts.swpProjectionChart.destroy();
+
+            const { corpusHistory: corpus7, withdrawalHistory } = calculateAndDisplaySWP('swp-table-7', 0.07);
+            const { corpusHistory: corpus10 } = calculateAndDisplaySWP('swp-table-10', 0.10);
+            const labels = Array.from({ length: 30 }, (_, i) => `वर्ष ${i + 1}`);
+
+            const ctx = document.getElementById('swpProjectionChart').getContext('2d');
+            charts.swpProjectionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'वार्षिक काढलेली रक्कम', data: withdrawalHistory, backgroundColor: 'rgba(255, 193, 7, 0.6)', yAxisID: 'y1', order: 2 },
+                        { label: '७% परताव्यावर निधी', data: corpus7, borderColor: '#F07167', backgroundColor: 'transparent', type: 'line', tension: 0.1, yAxisID: 'y' , order: 1},
+                        { label: '१०% परताव्यावर निधी', data: corpus10, borderColor: '#00AFB9', backgroundColor: 'transparent', type: 'line', tension: 0.1, yAxisID: 'y', order: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, ...chartTooltipOptions,
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'निधीचे मूल्य (कोटींमध्ये)' }, ticks: { callback: function(value) { return (value / 10000000).toFixed(2) + ' कोटी'; } } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'वार्षिक काढलेली रक्कम (लाखांमध्ये)' }, ticks: { callback: function(value) { return '₹' + (value / 100000).toFixed(1) + 'L'; } }, grid: { drawOnChartArea: false } },
+                        x: { title: { display: true, text: 'वर्षे' } }
+                    }
+                }
+            });
+        };
+
+        const renderFdDebtCharts = () => {
+            if (charts.returnComparisonChart) charts.returnComparisonChart.destroy();
+            const returnComparisonCtx = document.getElementById('returnComparisonChart').getContext('2d');
+            charts.returnComparisonChart = new Chart(returnComparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['मुदत ठेव (FD)', 'लिक्विड फंड', 'शॉर्ट ड्यूरेशन फंड', 'कॉर्पोरेट बॉण्ड फंड', 'गिल्ट फंड'],
+                    datasets: [{
+                        label: 'सामान्य वार्षिक परतावा श्रेणी (%)',
+                        data: [ [6.0, 7.5], [6.5, 7.5], [7.0, 8.0], [7.5, 8.5], [7.0, 9.0] ],
+                        backgroundColor: ['#F07167', '#FED9B7', '#00AFB9', '#0081A7', '#4a4e69'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: chartTooltipOptions.plugins.tooltip.callbacks.title,
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed?._custom && Array.isArray(context.parsed._custom) && context.parsed._custom.length === 2) {
+                                        const value = context.parsed._custom;
+                                        label += `${value[0].toFixed(1)}% - ${value[1].toFixed(1)}%`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, title: { display: true, text: 'संभाव्य वार्षिक परतावा (%)', font: { size: 14, weight: '600' } } },
+                        y: { ticks: { font: { size: 14 } } }
+                    }
+                }
+            });
+
+            if (charts.creditRiskChart) charts.creditRiskChart.destroy();
+            const creditRiskCtx = document.getElementById('creditRiskChart').getContext('2d');
+            charts.creditRiskChart = new Chart(creditRiskCtx, { type: 'doughnut', data: { labels: ['AAA रेटेड', 'AA रेटेड', 'सार्वभौम (G-Sec)', 'A आणि खाली'], datasets: [{ label: 'पोर्टफोलिओ वाटप', data: [65, 20, 10, 5], backgroundColor: ['#0081A7', '#00AFB9', '#FED9B7', '#F07167'], borderColor: '#ffffff', borderWidth: 4, }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', }, tooltip: { callbacks: { title: chartTooltipOptions.plugins.tooltip.callbacks.title, label: function(context) { return `${context.label}: ${context.parsed}%`; } } } } } });
+            
+            if (charts.interestRateRiskChart) charts.interestRateRiskChart.destroy();
+            const interestRateRiskCtx = document.getElementById('interestRateRiskChart').getContext('2d');
+            charts.interestRateRiskChart = new Chart(interestRateRiskCtx, { 
+                type: 'line', 
+                data: { 
+                    labels: ['जाने', 'फेब्रु', 'मार्च', 'एप्रिल', 'मे', 'जून'], 
+                    datasets: [ 
+                        { label: 'आरबीआय व्याज दर', data: [6.5, 6.6, 6.75, 6.55, 6.8, 7.0], borderColor: '#F07167', backgroundColor: 'rgba(240, 113, 103, 0.2)', fill: true, tension: 0.3 }, 
+                        { label: 'बॉण्डची किंमत (NAV)', data: [100, 99.5, 98.8, 100.2, 98.6, 98], borderColor: '#0081A7', backgroundColor: 'rgba(0, 129, 167, 0.2)', fill: true, tension: 0.3 } 
+                    ] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { 
+                            type: 'logarithmic',
+                            title: { 
+                                display: true, 
+                                text: 'मूल्य / दर (लॉग स्केल)', 
+                                font: { weight: '600' } 
+                            } 
+                        } 
+                    }, 
+                    plugins: { 
+                        legend: { position: 'bottom' }, 
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false, 
+                            callbacks: { title: chartTooltipOptions.plugins.tooltip.callbacks.title } 
+                        } 
+                    } 
+                } 
+            });
+            
+            renderSwpProjectionChart();
+        };
+
+        const renderTheMagicCharts = () => {
+            const energeticPalette = { brightBlue: '#00A6FB', mediumBlue: '#0582CA', darkBlue: '#006494', yellow: '#FBAF00', orange: '#FD5900', gray: '#6b7280' };
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true, backgroundColor: '#000000e0',
+                        titleFont: { size: 16, family: "'Inter', sans-serif" },
+                        bodyFont: { size: 14, family: "'Inter', sans-serif" },
+                        callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) { return label.join(' '); } else { return label; } } }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#4b5563', font: { family: "'Inter', sans-serif", size: 12 } }, grid: { display: false } },
+                    y: { ticks: { color: '#4b5563', font: { family: "'Inter', sans-serif", size: 12 } }, grid: { color: '#e5e7eb' } }
+                }
+            };
+            function wrapLabel(str, maxWidth) {
+                if (str.length <= maxWidth) { return str; }
+                const words = str.split(' '); let lines = []; let currentLine = '';
+                for (const word of words) { if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) { lines.push(currentLine); currentLine = word; } else { currentLine = (currentLine + ' ' + word).trim(); } }
+                if (currentLine.length > 0) { lines.push(currentLine); }
+                return lines;
+            }
+
+            const fundData = [ { name: 'निप्पॉन इंडिया ग्रोथ', xirr: 22.7, corpus: 4.98 }, { name: 'फ्रँकलिन इंडिया प्रायमा', xirr: 21.1, corpus: 3.79 }, { name: 'एसबीआय कॉन्ट्रा', xirr: 20.4, corpus: 3.45 }, { name: 'एचडीएफसी फ्लेक्सी कॅप', xirr: 20.0, corpus: 3.20 }, { name: 'एसबीआय कन्झम्प्शन संधी', xirr: 19.6, corpus: 2.92 }, { name: 'एसबीआय लाँग टर्म इक्विटी', xirr: 19.3, corpus: 2.86 }, { name: 'टाटा मिड कॅप ग्रोथ', xirr: 19.2, corpus: 2.81 }, { name: 'फ्रँकलिन इंडिया फ्लेक्सी कॅप', xirr: 18.9, corpus: 2.68 }, { name: 'एसबीआय मॅग्नम ग्लोबल', xirr: 18.7, corpus: 2.60 }, { name: 'एचडीएफसी ईएलएसएस टॅक्स सेव्हर', xirr: 18.7, corpus: 2.60 }, { name: 'निफ्टी ५० - टीआरआय', xirr: 14.6, corpus: 1.30 }, ].sort((a, b) => b.corpus - a.corpus);
+
+            if(charts.fundPerformanceChart) charts.fundPerformanceChart.destroy();
+            const fundPerformanceCtx = document.getElementById('fundPerformanceChart').getContext('2d');
+            charts.fundPerformanceChart = new Chart(fundPerformanceCtx, {
+                type: 'bar',
+                data: { labels: fundData.map(f => wrapLabel(f.name, 16)), datasets: [{ label: 'निधी (₹ कोटींमध्ये)', data: fundData.map(f => f.corpus), backgroundColor: fundData.map(f => f.name.includes('निफ्टी') ? energeticPalette.gray : energeticPalette.brightBlue), borderColor: fundData.map(f => f.name.includes('निफ्टी') ? energeticPalette.gray : energeticPalette.mediumBlue), borderWidth: 2, borderRadius: 4 }] },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: true, labels: { font: { size: 12 } } } }, indexAxis: 'y', scales: { x: { ...commonChartOptions.scales.x, title: { display: true, text: 'अंतिम निधी (₹ कोटींमध्ये)', color: '#374151', font: { size: 14, weight: '600', family: "'Inter', sans-serif" } } }, y: { ...commonChartOptions.scales.y, grid: { display: false } } } }
+            });
+
+            const categoryData = [ { category: 'लार्ज कॅप', return: 12.2, color: energeticPalette.gray }, { category: 'लार्ज आणि मिड कॅप', return: 13.7, color: energeticPalette.darkBlue }, { category: 'फ्लेक्सी कॅप', return: 14.7, color: energeticPalette.mediumBlue }, { category: 'व्हॅल्यू ओरिएंटेड', return: 15.5, color: energeticPalette.brightBlue }, { category: 'मिड कॅप', return: 16.1, color: energeticPalette.yellow }, { category: 'स्मॉल कॅप', return: 17.6, color: energeticPalette.orange }, ].sort((a, b) => a.return - b.return);
+            
+            if(charts.categoryPerformanceChart) charts.categoryPerformanceChart.destroy();
+            const categoryPerformanceCtx = document.getElementById('categoryPerformanceChart').getContext('2d');
+            charts.categoryPerformanceChart = new Chart(categoryPerformanceCtx, {
+                type: 'bar',
+                data: { labels: categoryData.map(c => c.category), datasets: [{ label: 'सरासरी ५ वर्षांचा SIP परतावा (%)', data: categoryData.map(c => c.return), backgroundColor: categoryData.map(c => c.color), borderWidth: 0, borderRadius: 4 }] },
+                options: { ...commonChartOptions, indexAxis: 'y', scales: { x: { ...commonChartOptions.scales.x, title: { display: true, text: 'सरासरी ५ वर्षांचा SIP परतावा (%)', color: '#374151', font: { size: 14, weight: '600', family: "'Inter', sans-serif" } } }, y: { ...commonChartOptions.scales.y, grid: { display: false } } } }
+            });
+
+            const annualRate = 0.227; const years = Array.from({ length: 26 }, (_, i) => `वर्ष ${i}`);
+            const regularSipData = { investmentData: [], growthData: [], corpusData: [] };
+            let runningInvestment = 0; let runningCorpus = 0; const annualInvestment = 0.6; 
+            for (let i = 0; i <= 25; i++) { regularSipData.investmentData.push(runningInvestment); const growth = runningCorpus - runningInvestment; regularSipData.growthData.push(growth > 0 ? growth : 0); regularSipData.corpusData.push(runningCorpus); if (i < 25) { runningCorpus = (runningCorpus + annualInvestment) * (1 + annualRate); runningInvestment += annualInvestment; } }
+            const stepUpCorpusData = []; let stepUpRunningCorpus = 0; let stepUpAnnualInvestment = 0.6; const stepUpRate = 0.1;
+            for (let i = 0; i <= 25; i++) { stepUpCorpusData.push(stepUpRunningCorpus); if (i < 25) { stepUpRunningCorpus = (stepUpRunningCorpus + stepUpAnnualInvestment) * (1 + annualRate); stepUpAnnualInvestment *= (1 + stepUpRate); } }
+
+            if(charts.sipGrowthChart) charts.sipGrowthChart.destroy();
+            const sipGrowthCtx = document.getElementById('sipGrowthChart').getContext('2d');
+            charts.sipGrowthChart = new Chart(sipGrowthCtx, {
+                type: 'line',
+                data: { labels: years, datasets: [{ label: 'एकूण गुंतवणूक (₹ कोटी)', data: regularSipData.investmentData.map(v => (v / 100).toFixed(2)), backgroundColor: 'rgba(0, 100, 148, 0.2)', borderColor: energeticPalette.darkBlue, fill: true, tension: 0.4, pointRadius: 0 }, { label: 'गुंतवणुकीची वाढ (₹ कोटी)', data: regularSipData.growthData.map(v => (v / 100).toFixed(2)), backgroundColor: 'rgba(0, 166, 251, 0.2)', borderColor: energeticPalette.brightBlue, fill: true, tension: 0.4, pointRadius: 0 }] },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: true, labels: { font: { size: 12 } } } }, scales: { x: { ...commonChartOptions.scales.x, title: { display: true, text: 'वर्षे', color: '#374151', font: { size: 14, weight: '600' } }}, y: { ...commonChartOptions.scales.y, stacked: true, title: { display: true, text: 'मूल्य (₹ कोटींमध्ये)', color: '#374151', font: { size: 14, weight: '600' } } } } }
+            });
+            
+            if(charts.stepUpComparisonChart) charts.stepUpComparisonChart.destroy();
+            const stepUpComparisonCtx = document.getElementById('stepUpComparisonChart').getContext('2d');
+            charts.stepUpComparisonChart = new Chart(stepUpComparisonCtx, {
+                type: 'line',
+                data: { labels: years, datasets: [{ label: 'स्टेप-अप SIP निधी (₹ कोटी)', data: stepUpCorpusData.map(v => (v / 100).toFixed(2)), borderColor: energeticPalette.yellow, backgroundColor: 'transparent', tension: 0.4, borderWidth: 3 }, { label: 'नियमित SIP निधी (₹ कोटी)', data: regularSipData.corpusData.map(v => (v / 100).toFixed(2)), borderColor: energeticPalette.mediumBlue, backgroundColor: 'transparent', tension: 0.4, borderWidth: 3, borderDash: [5, 5] }] },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: true, labels: { font: { size: 12 } } } }, scales: { x: { ...commonChartOptions.scales.x, title: { display: true, text: 'वर्षे', color: '#374151', font: { size: 14, weight: '600' } }}, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'निधी (₹ कोटींमध्ये)', color: '#374151', font: { size: 14, weight: '600' } } } } }
+            });
+            
+            if(charts.drawdownChart) charts.drawdownChart.destroy();
+            const drawdownCtx = document.getElementById('drawdownChart').getContext('2d');
+            const drawdownData = Array.from({length: 50}, () => Math.random() * -65);
+            charts.drawdownChart = new Chart(drawdownCtx, {
+                type: 'bar',
+                data: { labels: Array.from({length: 50}, (_, i) => 2000 + i/2), datasets: [{ label: 'मासिक घट (%)', data: drawdownData, backgroundColor: drawdownData.map(d => d < -40 ? energeticPalette.orange : energeticPalette.mediumBlue), borderWidth: 0 }] },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: true, labels: { font: { size: 12 } } } }, scales: { x: { ...commonChartOptions.scales.x, ticks: { maxTicksLimit: 15 } }, y: { ...commonChartOptions.scales.y, title: { display: true, text: 'बाजारातील घट (%)', color: '#374151', font: { size: 14, weight: '600' } } } } }
+            });
+        };
+
+        const renderMarketUncertaintyCharts = () => {
+            function wrapLabel(str, maxWidth) {
+                if (str.length <= maxWidth) { return str; }
+                const words = str.split(' '); let lines = []; let currentLine = '';
+                for (const word of words) { if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) { lines.push(currentLine); currentLine = word; } else { currentLine = (currentLine + ' ' + word).trim(); } }
+                if (currentLine.length > 0) { lines.push(currentLine); }
+                return lines;
+            }
+            const defaultTooltipCallback = { plugins: { tooltip: { callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) { return label.join(' '); } return label; }, label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += context.parsed.y + '%'; } return label; } } } } };
+            
+            if(charts.uncertaintyChart) charts.uncertaintyChart.destroy();
+            const uncertaintyChartCtx = document.getElementById('uncertaintyChart').getContext('2d');
+            const uncertaintyLabels = ['1995', '1998', '2001', '2003', '2008', '2010', '2012', '2016', '2020', '2022', '2024'];
+            const uncertaintyData = [100, 80, 270, 150, 250, 200, 260, 100, 450, 150, 370];
+            const uncertaintyAnnotations = [ { label: '९/११ दहशतवादी हल्ले', x: '2001', y: 270 }, { label: 'जागतिक आर्थिक संकट', x: '2008', y: 250 }, { label: 'सार्वभौम कर्ज संकट', x: '2012', y: 260 }, { label: 'कोविड', x: '2020', y: 450 }, { label: 'ट्रम्प', x: '2024', y: 370 } ];
+            charts.uncertaintyChart = new Chart(uncertaintyChartCtx, {
+                type: 'line',
+                data: { labels: uncertaintyLabels, datasets: [{ label: 'आर्थिक धोरण अनिश्चितता निर्देशांक', data: uncertaintyData, borderColor: '#444e86', backgroundColor: 'rgba(68, 78, 134, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipCallback, scales: { y: { beginAtZero: true, max: 550, grid: { color: '#e5e7eb', }, }, x: { grid: { display: false, } } }, plugins: { ...defaultTooltipCallback.plugins, legend: { display: false } } },
+                plugins: [{ id: 'customAnnotations', afterDraw: chart => { const ctx = chart.ctx; const xAxis = chart.scales.x; const yAxis = chart.scales.y; uncertaintyAnnotations.forEach(ann => { const x = xAxis.getPixelForValue(uncertaintyLabels.indexOf(ann.x)); const y = yAxis.getPixelForValue(ann.y); ctx.save(); ctx.beginPath(); ctx.moveTo(x, yAxis.bottom); ctx.lineTo(x, y + 10); ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)'; ctx.setLineDash([6, 6]); ctx.stroke(); const textContent = wrapLabel(ann.label, 16); const lines = Array.isArray(textContent) ? textContent : [textContent]; const textMetrics = lines.map(line => ctx.measureText(line)); const textWidth = Math.max(...textMetrics.map(m => m.width)); const textHeight = lines.length * 14; ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; ctx.fillRect(x - textWidth / 2 - 4, y - textHeight - 12, textWidth + 8, textHeight + 8); ctx.fillStyle = '#003f5c'; ctx.font = 'bold 12px Inter'; ctx.textAlign = 'center'; lines.forEach((line, i) => { ctx.fillText(line, x, y - textHeight + (i * 14) - 4); }); ctx.restore(); }); } }]
+            });
+
+            if(charts.marketTimingChart) charts.marketTimingChart.destroy();
+            const marketTimingChartCtx = document.getElementById('marketTimingChart').getContext('2d');
+            charts.marketTimingChart = new Chart(marketTimingChartCtx, {
+                type: 'line',
+                data: { labels: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'], datasets: [ { label: 'पूर्णपणे गुंतवलेले राहिले', data: [100000, 125000, 140000, 160000, 155000, 220000, 250000, 280000, 317000], borderColor: '#003f5c', backgroundColor: 'transparent', tension: 0.3, borderWidth: 4 }, { label: '५ सर्वोत्तम दिवस चुकवले', data: [100000, 118000, 130000, 145000, 120000, 160000, 180000, 205000, 232000], borderColor: '#955196', backgroundColor: 'transparent', tension: 0.3, borderDash: [5, 5] }, { label: '१० सर्वोत्तम दिवस चुकवले', data: [100000, 112000, 125000, 130000, 90000, 135000, 150000, 170000, 190000], borderColor: '#ff6e54', backgroundColor: 'transparent', tension: 0.3, borderDash: [5, 5] }, { label: '२० सर्वोत्तम दिवस चुकवले', data: [100000, 108000, 115000, 120000, 70000, 105000, 120000, 130000, 140000], borderColor: '#ffa600', backgroundColor: 'transparent', tension: 0.3, borderDash: [5, 5] } ] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipCallback, scales: { y: { ticks: { callback: function(value, index, values) { return '₹' + (value / 100000).toFixed(2) + 'L'; } }, grid: { color: '#e5e7eb', }, }, x: { grid: { display: false, } } }, plugins: { ...defaultTooltipCallback.plugins, legend: { position: 'bottom', labels: { usePointStyle: true, } } } }
+            });
+
+            if(charts.eventReturnsChart) charts.eventReturnsChart.destroy();
+            const eventReturnsCtx = document.getElementById('eventReturnsChart').getContext('2d');
+            const eventData = { labels: [ wrapLabel('ब्रेक्झिट', 16), wrapLabel('कोविड-१९', 16), wrapLabel('पुलवामा हल्ला', 16), wrapLabel('बालाकोट स्ट्राइक', 16), wrapLabel('भारत चीन संघर्ष', 16), wrapLabel('यूएस अफगाण माघार', 16), wrapLabel('रशिया युक्रेन युद्ध', 16), wrapLabel('इस्त्रायलवर हल्ला', 16), wrapLabel('इस्त्रायल हमास हल्ला', 16), wrapLabel('टेरिफ युद्ध', 16) ], datasets: [ { label: 'निफ्टी १०० टीआरआय', data: [14.8, 26.9, 15.6, 15.5, 21.6, 17.8, 15.3, 17.7, 19.7, 12.0], backgroundColor: '#003f5c', }, { label: 'निफ्टी मिड कॅप १५० टीआरआय', data: [20.1, 37.8, 23.8, 23.6, 32.7, 27.1, 26.3, 24.0, 27.2, 19.2], backgroundColor: '#7a5195', }, { label: 'निफ्टी स्मॉल कॅप २५० टीआरआय', data: [17.6, 40.8, 23.7, 23.3, 35.6, 28.2, 24.9, 22.6, 25.7, 21.4], backgroundColor: '#ef5675', }, { label: 'निफ्टी लार्ज मिड कॅप २५०', data: [17.5, 32.4, 19.8, 19.6, 27.2, 22.5, 20.8, 21.0, 23.6, 15.6], backgroundColor: '#ffa600', } ] };
+            charts.eventReturnsChart = new Chart(eventReturnsCtx, {
+                type: 'bar', data: eventData,
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipCallback, scales: { y: { beginAtZero: true, title: { display: true, text: 'परतावा CAGR (%)' }, grid: { color: '#e5e7eb', }, }, x: { grid: { display: false, } } }, plugins: { ...defaultTooltipCallback.plugins, legend: { position: 'bottom' } } }
+            });
+
+            if(charts.behaviouralGapChart) charts.behaviouralGapChart.destroy();
+            const behaviouralGapChartCtx = document.getElementById('behaviouralGapChart').getContext('2d');
+            charts.behaviouralGapChart = new Chart(behaviouralGapChartCtx, {
+                type: 'line',
+                data: { labels: Array.from({length: 11}, (_, i) => `वर्ष ${i}`), datasets: [ { label: 'गुंतवणूकदाराच्या अपेक्षा', data: [10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120], borderColor: '#ffa600', backgroundColor: 'rgba(255, 166, 0, 0.3)', fill: 'origin', tension: 0.4, pointRadius: 0, }, { label: 'वास्तव', data: [10, 15, 25, 20, 35, 45, 38, 55, 60, 50, 75], borderColor: '#444e86', backgroundColor: 'rgba(68, 78, 134, 0.5)', fill: 'origin', tension: 0.4, pointRadius: 0, } ] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipCallback, scales: { y: { display: false, }, x: { display: false, } }, elements: { line: { borderWidth: 3 } }, plugins: { ...defaultTooltipCallback.plugins, legend: { position: 'bottom', labels: { font: { size: 14 } } } } }
+            });
+        };
+        
+        // Tab Switching Logic
+        const tabs = document.querySelectorAll('.tab-button');
+        const pages = document.querySelectorAll('.page');
+
+        const switchTab = (tabId) => {
+            const pageId = tabId.replace('tab-', '') + 'Page';
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            pages.forEach(p => p.classList.remove('active'));
+            const activePage = document.getElementById(pageId);
+            if(activePage) activePage.classList.add('active');
+            
+            // Re-render charts for the active tab to ensure they display correctly
+            if (pageId === 'raceToWealthPage') {
+                renderCagrChart();
+                renderAnnualReturnsChart();
+                renderRiskProfileChart();
+                populateDataTable();
+            } else if (pageId === 'fdVsDebtPage') {
+                renderFdDebtCharts();
+            } else if (pageId === 'theMagicPage') {
+                renderTheMagicCharts();
+            } else if (pageId === 'marketUncertaintyPage') {
+                renderMarketUncertaintyCharts();
+            } else if (pageId === 'mutualFundsExplainedPage') {
+                renderMutualFundsCharts();
+            }
+        };
+
+        const renderMutualFundsCharts = () => {
+            const brilliantBluesPalette = { darkBlue: '#005F73', teal: '#0A9396', lightTeal: '#94D2BD', sand: '#E9D8A6', gold: '#EE9B00', orange: '#CA6702', darkOrange: '#BB3E03', red: '#AE2012', darkRed: '#9B2226' };
+            const chartTooltipConfig = { plugins: { tooltip: { callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) { return label.join(' '); } else { return label; } } } } } };
+            function wrapLabels(label, maxLength) { if (label.length <= maxLength) { return label; } const words = label.split(' '); let currentLine = ''; const lines = []; for (const word of words) { if ((currentLine + word).length > maxLength) { lines.push(currentLine.trim()); currentLine = ''; } currentLine += word + ' '; } lines.push(currentLine.trim()); return lines; }
+
+            if(charts.diversificationChart) charts.diversificationChart.destroy();
+            charts.diversificationChart = new Chart(document.getElementById('diversificationChart'), {
+                type: 'doughnut',
+                data: { labels: ['कंपनी A स्टॉक', 'कंपनी B स्टॉक', 'कंपनी C स्टॉक', 'सरकारी बॉण्ड्स', 'कॉर्पोरेट बॉण्ड्स', 'इतर मालमत्ता'], datasets: [{ label: 'पोर्टफोलिओ वाटप', data: [15, 20, 10, 25, 20, 10], backgroundColor: [ brilliantBluesPalette.teal, brilliantBluesPalette.gold, brilliantBluesPalette.darkBlue, brilliantBluesPalette.lightTeal, brilliantBluesPalette.orange, brilliantBluesPalette.sand ], borderColor: '#ffffff', borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', }, ...chartTooltipConfig.plugins } }
+            });
+
+            const riskReturnLabels = ['डेट फंड', 'हायब्रीड फंड', 'लार्ज-कॅप इक्विटी', 'मिड-कॅप इक्विटी', 'स्मॉल-कॅप इक्विटी'].map(l => wrapLabels(l, 16));
+            if(charts.riskReturnChart) charts.riskReturnChart.destroy();
+            charts.riskReturnChart = new Chart(document.getElementById('riskReturnChart'), {
+                type: 'bar',
+                data: { labels: riskReturnLabels, datasets: [{ label: 'संभाव्य धोका/परतावा स्तर', data: [2, 4, 6, 8, 10], backgroundColor: [ brilliantBluesPalette.lightTeal, brilliantBluesPalette.teal, brilliantBluesPalette.darkBlue, brilliantBluesPalette.orange, brilliantBluesPalette.red ], borderColor: brilliantBluesPalette.darkBlue, borderWidth: 1 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, title: { display: true, text: 'स्तर (कमी ते जास्त)' } } }, plugins: { legend: { display: false }, ...chartTooltipConfig.plugins } }
+            });
+
+            if(charts.hybridAllocationChart) charts.hybridAllocationChart.destroy();
+            charts.hybridAllocationChart = new Chart(document.getElementById('hybridAllocationChart'), {
+                type: 'bar',
+                data: { labels: ['पुराणमतवादी', 'संतुलित', 'आक्रमक'], datasets: [ { label: 'डेट', data: [70, 50, 30], backgroundColor: brilliantBluesPalette.teal, }, { label: 'इक्विटी', data: [30, 50, 70], backgroundColor: brilliantBluesPalette.orange, } ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: '% वाटप' } } }, plugins: { legend: { position: 'bottom' }, ...chartTooltipConfig.plugins } }
+            });
+
+            if(charts.navGrowthChart) charts.navGrowthChart.destroy();
+            charts.navGrowthChart = new Chart(document.getElementById('navGrowthChart'), {
+                type: 'line',
+                data: { labels: ['वर्ष १', 'वर्ष २', 'वर्ष ३', 'वर्ष ४', 'वर्ष ५', 'वर्ष ६', 'वर्ष ७'], datasets: [{ label: 'NAV (₹ मध्ये)', data: [10, 11.5, 13, 12.5, 15, 18, 22], borderColor: brilliantBluesPalette.darkBlue, backgroundColor: 'rgba(10, 147, 150, 0.1)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: 'नेट अॅसेट व्हॅल्यू (NAV)' } } }, plugins: { legend: { display: false }, ...chartTooltipConfig.plugins } }
+            });
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.id));
+        });
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('tab-mutualFundsExplained');
+        });
+    </script>
+
+</body>
+</html>
