@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">Financial Infographics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #0A2463;
+            color: white;
+            border-bottom: 3px solid #F5D547;
+        }
+        .tab-button:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Chart Container Base Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Page Specific Styles */
+        #raceToWealthPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        #raceToWealthPage .chart-container {
+            max-width: 800px;
+            height: 300px; /* Mobile height */
+        }
+         @media (min-width: 768px) {
+            #raceToWealthPage .chart-container {
+                height: 400px; /* Desktop height */
+            }
+        }
+        #raceToWealthPage .kpi-card {
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border-left: 5px solid;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #raceToWealthPage .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        #raceToWealthPage .data-table-container {
+            overflow-x: auto;
+        }
+
+        #fdVsDebtPage {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FDFCDC;
+            color: #333333;
+        }
+        #fdVsDebtPage .text-custom-blue { color: #0081A7; }
+        #fdVsDebtPage .bg-custom-blue { background-color: #0081A7; }
+        #fdVsDebtPage .text-custom-teal { color: #00AFB9; }
+        #fdVsDebtPage .bg-custom-teal { background-color: #00AFB9; }
+        #fdVsDebtPage .text-custom-orange { color: #F07167; }
+        #fdVsDebtPage .bg-custom-orange { background-color: #F07167; }
+        #fdVsDebtPage .text-custom-peach { color: #FED9B7; }
+        #fdVsDebtPage .bg-custom-peach { background-color: #FED9B7; }
+        #fdVsDebtPage .chart-container {
+            max-width: 600px;
+            height: 350px;
+        }
+         @media (min-width: 768px) {
+            #fdVsDebtPage .chart-container {
+                height: 400px;
+            }
+        }
+        #fdVsDebtPage .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #0081A7;
+        }
+
+        #theMagicPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        #theMagicPage .chart-container {
+            max-width: 800px;
+            height: 300px; /* Mobile height */
+        }
+        @media (min-width: 768px) {
+            #theMagicPage .chart-container {
+                height: 400px; /* Desktop height */
+            }
+        }
+        #theMagicPage .kpi-card {
+            background-color: #006494;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        #theMagicPage .kpi-value {
+            font-size: 2.5rem; /* Mobile font size */
+            font-weight: 900;
+            line-height: 1.1;
+            color: #FBAF00;
+        }
+        @media (min-width: 768px) {
+             #theMagicPage .kpi-value {
+                font-size: 3rem; /* Desktop font size */
+             }
+        }
+        #theMagicPage .kpi-label {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        #theMagicPage .flowchart-step {
+            display: flex;
+            align-items: center;
+            position: relative;
+            min-height: 80px;
+        }
+        #theMagicPage .flowchart-step:not(:last-child)::after {
+            content: '▼';
+            position: absolute;
+            left: 30px;
+            bottom: -5px;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #0582CA;
+        }
+        #theMagicPage .flowchart-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        #theMagicPage .category-item {
+            border-left-width: 4px;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #marketUncertaintyPage {
+            font-family: 'Inter', sans-serif;
+        }
+        #marketUncertaintyPage .chart-container {
+            height: 350px; /* Mobile height */
+        }
+        @media (min-width: 768px) {
+            #marketUncertaintyPage .chart-container {
+                height: 50vh; /* Desktop height */
+                max-height: 550px;
+            }
+        }
+        
+        #mutualFundsExplainedPage {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        #mutualFundsExplainedPage .chart-container {
+            max-width: 500px;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            #mutualFundsExplainedPage .chart-container {
+                height: 350px;
+            }
+        }
+        #mutualFundsExplainedPage .flow-arrow {
+            color: #0A9396;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        #mutualFundsExplainedPage .kpi-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 5px solid #EE9B00;
+        }
+        #mutualFundsExplainedPage .content-card {
+             background-color: white;
+             border-radius: 0.75rem;
+             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+             padding: 1.5rem; /* Mobile padding */
+             margin-bottom: 1.5rem;
+        }
+         @media (min-width: 768px) {
+            #mutualFundsExplainedPage .content-card {
+                padding: 2rem; /* Desktop padding */
+                margin-bottom: 2rem;
+            }
+         }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md sticky top-0 z-10">
+        <nav class="container mx-auto flex flex-col md:flex-row md:flex-wrap">
+            <button id="tab-mutualFundsExplained" class="tab-button w-full md:flex-1 py-3 md:py-4 px-4 md:px-6 font-semibold text-base md:text-lg active" data-lang-key="tabMutualFundsExplained">Mutual Funds Explained</button>
+            <button id="tab-raceToWealth" class="tab-button w-full md:flex-1 py-3 md:py-4 px-4 md:px-6 font-semibold text-base md:text-lg" data-lang-key="tabRaceToWealth">Race to Wealth</button>
+            <button id="tab-fdVsDebt" class="tab-button w-full md:flex-1 py-3 md:py-4 px-4 md:px-6 font-semibold text-base md:text-lg" data-lang-key="tabFdVsDebt">FD vs Debt Funds</button>
+            <button id="tab-theMagic" class="tab-button w-full md:flex-1 py-3 md:py-4 px-4 md:px-6 font-semibold text-base md:text-lg" data-lang-key="tabTheMagic">The Magic of Compounding</button>
+            <button id="tab-marketUncertainty" class="tab-button w-full md:flex-1 py-3 md:py-4 px-4 md:px-6 font-semibold text-base md:text-lg" data-lang-key="tabMarketUncertainty">Market Uncertainty</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page 1: Mutual Funds Explained -->
+        <div id="mutualFundsExplainedPage" class="page active">
+            <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+                <header class="text-center my-8 md:my-12">
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-[#005F73]" data-lang-key="mfe_title">Mutual Funds Explained</h1>
+                    <p class="text-base md:text-xl text-gray-600 mt-4 max-w-3xl mx-auto" data-lang-key="mfe_subtitle">Your simplified guide to understanding how to make your money work for you through collective investing.</p>
+                </header>
+                <main>
+                    <section class="content-card">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-bold text-[#0A9396] mb-4" data-lang-key="mfe_what_is_idea">What's the Big Idea?</h2>
+                                <p class="mb-6 text-gray-600" data-lang-key="mfe_what_is_idea_p">Investing on your own can be tough. It requires a lot of money to buy shares in many different companies. A mutual fund solves this by pooling money from many people to invest on a large scale. Think of it as financial teamwork.</p>
+                                <div class="p-4 md:p-6 bg-blue-50 rounded-lg">
+                                     <h3 class="font-bold text-lg text-[#005F73] mb-2" data-lang-key="mfe_process_nutshell">The Process in a Nutshell</h3>
+                                     <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                                        <div class="text-center">
+                                            <div class="text-4xl">🧑‍🤝‍🧑</div>
+                                            <p class="font-semibold" data-lang-key="mfe_investors">Investors</p>
+                                        </div>
+                                        <div class="flow-arrow font-bold transform rotate-90 md:rotate-0">→</div>
+                                        <div class="text-center">
+                                            <div class="text-4xl">💰</div>
+                                            <p class="font-semibold" data-lang-key="mfe_pooled_money">Pooled Money</p>
+                                        </div>
+                                        <div class="flow-arrow font-bold transform rotate-90 md:rotate-0">→</div>
+                                         <div class="text-center">
+                                            <div class="text-4xl">📈</div>
+                                            <p class="font-semibold" data-lang-key="mfe_stocks_bonds">Stocks & Bonds</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div>
+                                <div class="chart-container">
+                                    <canvas id="diversificationChart"></canvas>
+                                </div>
+                                 <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="mfe_diversification_p">A mutual fund instantly diversifies your investment across many assets, reducing risk compared to holding a single stock.</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="my-8 md:my-12">
+                         <h2 class="text-2xl md:text-3xl font-bold text-[#0A9396] mb-6 text-center" data-lang-key="mfe_key_advantages">Key Advantages: Why It's a Smart Move</h2>
+                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="kpi-card">
+                                <div class="text-4xl mb-3">🛡️</div>
+                                <h3 class="text-xl font-bold text-[#005F73]" data-lang-key="mfe_adv_diversification">Instant Diversification</h3>
+                                <p class="text-gray-600 mt-1" data-lang-key="mfe_adv_diversification_p">Don't put all your eggs in one basket. Your money is spread across many investments, lowering risk.</p>
+                            </div>
+                             <div class="kpi-card">
+                                <div class="text-4xl mb-3">🧠</div>
+                                <h3 class="text-xl font-bold text-[#005F73]" data-lang-key="mfe_adv_management">Professional Management</h3>
+                                <p class="text-gray-600 mt-1" data-lang-key="mfe_adv_management_p">Full-time experts research and manage the portfolio for you. No need to be a market guru.</p>
+                            </div>
+                             <div class="kpi-card">
+                                <div class="text-4xl mb-3">💵</div>
+                                <h3 class="text-xl font-bold text-[#005F73]" data-lang-key="mfe_adv_affordability">Affordability</h3>
+                                <p class="text-gray-600 mt-1" data-lang-key="mfe_adv_affordability_p">Start investing with as little as ₹500 via a Systematic Investment Plan (SIP).</p>
+                            </div>
+                             <div class="kpi-card">
+                                 <div class="text-4xl mb-3">🔄</div>
+                                <h3 class="text-xl font-bold text-[#005F73]" data-lang-key="mfe_adv_liquidity">High Liquidity</h3>
+                                <p class="text-gray-600 mt-1" data-lang-key="mfe_adv_liquidity_p">Easily buy or sell your fund units on any business day at the current market value (NAV).</p>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="content-card">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#0A9396] mb-6 text-center" data-lang-key="mfe_portfolio_compare">What's in the Portfolio? Comparing Fund Types</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-center text-[#005F73] mb-2" data-lang-key="mfe_risk_return">Risk vs. Potential Return</h3>
+                                <p class="text-center text-sm text-gray-500 mb-4" data-lang-key="mfe_risk_return_p">Different fund types offer different levels of risk and potential for growth. Equity funds are higher risk but offer higher potential returns, while debt funds are safer.</p>
+                                <div class="chart-container" style="height: 300px; md:height: 400px;">
+                                    <canvas id="riskReturnChart"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-center text-[#005F73] mb-2" data-lang-key="mfe_hybrid_funds">Hybrid Funds: A Balanced Approach</h3>
+                                 <p class="text-center text-sm text-gray-500 mb-4" data-lang-key="mfe_hybrid_funds_p">Hybrid funds mix stocks (equity) and bonds (debt) to balance risk. The mix changes based on the fund's objective.</p>
+                                <div class="chart-container" style="height: 300px; md:height: 400px;">
+                                    <canvas id="hybridAllocationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="content-card">
+                         <h2 class="text-2xl md:text-3xl font-bold text-[#0A9396] mb-6 text-center" data-lang-key="mfe_how_money_grows">How Your Money Grows</h2>
+                        <div class="grid grid-cols-1">
+                            <div class="max-w-xl mx-auto text-center">
+                                <h3 class="text-xl font-bold text-[#005F73] mb-2" data-lang-key="mfe_nav_growth">Capital Appreciation (NAV Growth)</h3>
+                                <p class="text-gray-600 mb-4" data-lang-key="mfe_nav_growth_p">The main way you earn is through the growth of your investment's value. The Net Asset Value (NAV) is the price of one unit of a fund. As the value of the fund's investments (stocks, bonds) goes up, the NAV increases. You profit when you sell your units at a higher price.</p>
+                                <div class="chart-container" style="height: 250px; md:height: 300px;">
+                                    <canvas id="navGrowthChart"></canvas>
+                                </div>
+                                 <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="mfe_nav_growth_illustrative">Illustrative growth of NAV over time.</p>
+                            </div>
+                        </div>
+                    </section>
+                      <section class="content-card">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#0A9396] mb-6 text-center" data-lang-key="mfe_fine_print">The Fine Print: What to Know</h2>
+                        <div class="max-w-2xl mx-auto">
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-2xl text-[#EE9B00] font-bold mr-4">!</span>
+                                    <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]" data-lang-key="mfe_expense_ratio">Expense Ratio</h4>
+                                        <p class="text-gray-600" data-lang-key="mfe_expense_ratio_p">A small annual fee (usually 1-2%) charged by the fund to cover the costs of professional management and operations. This is automatically deducted from your investment's value.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-2xl text-[#CA6702] font-bold mr-4">!</span>
+                                     <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]" data-lang-key="mfe_market_risk">Market Risk</h4>
+                                        <p class="text-gray-600" data-lang-key="mfe_market_risk_p">Remember, returns are not guaranteed. The value of your investment (NAV) will fluctuate based on market performance. Investing for the long term helps ride out these ups and downs.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                     <span class="text-2xl text-[#BB3E03] font-bold mr-4">!</span>
+                                    <div>
+                                        <h4 class="font-bold text-lg text-[#005F73]" data-lang-key="mfe_exit_load">Exit Load</h4>
+                                        <p class="text-gray-600" data-lang-key="mfe_exit_load_p">Some funds charge a fee if you sell your units within a short period (like one year). This is to encourage long-term investment rather than short-term speculation.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </main>
+                <footer class="text-center mt-12 py-6 border-t border-gray-200">
+                    <p class="text-gray-500" data-lang-key="mfe_footer">This infographic is for educational purposes only and does not constitute financial advice. All data is illustrative.</p>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Page 2: Race to Wealth -->
+        <div id="raceToWealthPage" class="page">
+            <div class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-8 md:mb-12">
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-[#0A2463] mb-2" data-lang-key="rtw_title">The 30-Year Race to Wealth</h1>
+                    <p class="text-base md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="rtw_subtitle">An analysis of where a ₹50,000 annual investment would have taken you over three decades (FY 1996 - FY 2025).</p>
+                </header>
+                <div class="space-y-8 md:space-y-12">
+                    <section id="kpis">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-[#0A2463]" data-lang-key="rtw_final_tally">The Final Tally: Where Your Money Would've Grown</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                            <div class="kpi-card shadow-lg rounded-lg p-4 md:p-6 border-[#0A2463]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase" data-lang-key="rtw_nifty_label">NIFTY-500 (EQUITY)</p>
+                                <p class="text-4xl md:text-5xl font-extrabold text-[#0A2463] my-2">₹2.33 Cr</p>
+                                <p class="text-base md:text-lg font-medium text-gray-700" data-lang-key="rtw_nifty_sub">Highest Growth</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-4 md:p-6 border-[#F5D547]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase" data-lang-key="rtw_gold_label">GOLD</p>
+                                <p class="text-4xl md:text-5xl font-extrabold text-[#F5D547] my-2">₹1.35 Cr</p>
+                                <p class="text-base md:text-lg font-medium text-gray-700" data-lang-key="rtw_gold_sub">Top Performing Commodity</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-4 md:p-6 border-[#3E8989]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">PPF</p>
+                                <p class="text-4xl md:text-5xl font-extrabold text-[#3E8989] my-2">₹63.2 L</p>
+                                <p class="text-base md:text-lg font-medium text-gray-700" data-lang-key="rtw_ppf_sub">Stable & Secure</p>
+                            </div>
+                            <div class="kpi-card shadow-lg rounded-lg p-4 md:p-6 border-[#dc3545]">
+                                <p class="text-sm font-semibold text-gray-500 uppercase">SILVER</p>
+                                <p class="text-4xl md:text-5xl font-extrabold text-[#dc3545] my-2">₹93.2 L</p>
+                                <p class="text-base md:text-lg font-medium text-gray-700" data-lang-key="rtw_silver_sub">Most Volatile</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-lg shadow-xl p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#0A2463]" data-lang-key="rtw_cagr_title">Long-Term Growth Engine: CAGR</h2>
+                        <p class="text-sm md:text-base text-gray-600 text-center mb-6 max-w-2xl mx-auto" data-lang-key="rtw_cagr_p">The Compound Annual Growth Rate (CAGR) reveals the true average return of an investment over time. Equities have significantly outpaced other asset classes, demonstrating their power for wealth creation.</p>
+                        <div class="chart-container">
+                            <canvas id="cagrChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#0A2463]" data-lang-key="rtw_annual_returns_title">The Volatile Journey: Annual Returns</h2>
+                        <p class="text-sm md:text-base text-gray-600 text-center mb-6 max-w-2xl mx-auto" data-lang-key="rtw_annual_returns_p">This chart plots the turbulent ride of key asset classes against the steady rise of inflation. While equities (Nifty-500) show sharp peaks and valleys, their long-term trend is strongly upward. Gold often surges when equities falter, showcasing its role as a hedge.</p>
+                        <div class="chart-container">
+                            <canvas id="annualReturnsChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#0A2463]" data-lang-key="rtw_risk_reward_title">Risk vs. Reward: A Double-Edged Sword</h2>
+                        <p class="text-sm md:text-base text-gray-600 text-center mb-6 max-w-2xl mx-auto" data-lang-key="rtw_risk_reward_p">High rewards often come with high risks. This chart shows how many times each asset was the year's best performer versus its worst. Silver's profile is striking—a frequent winner, but also the most frequent loser, highlighting extreme volatility.</p>
+                        <div class="chart-container">
+                            <canvas id="riskProfileChart"></canvas>
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-[#0A2463]" data-lang-key="rtw_lessons_title">Key Investment Lessons from 30 Years</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]" data-lang-key="rtw_lesson1_h">📈 Risk Defines Reward</h3><p class="text-gray-700" data-lang-key="rtw_lesson1_p">The highest long-term wealth was created in equities, which also experienced the most significant short-term drawdowns. Accepting volatility is essential for high growth.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]" data-lang-key="rtw_lesson2_h">⏳ Time is Your Ally</h3><p class="text-gray-700" data-lang-key="rtw_lesson2_p">Over 30 years, the power of compounding in high-growth assets smooths out short-term market noise. Staying invested is more important than timing the market.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]" data-lang-key="rtw_lesson3_h">🛡️ Diversification Matters</h3><p class="text-gray-700" data-lang-key="rtw_lesson3_p">No single asset wins every year. When equities fell, Gold often rose. A diversified portfolio can cushion against downturns in any single asset class.</p></div>
+                            <div class="bg-white rounded-lg shadow-lg p-6"><h3 class="font-bold text-xl mb-2 text-[#0A2463]" data-lang-key="rtw_lesson4_h">💰 Beat Inflation to Win</h3><p class="text-gray-700" data-lang-key="rtw_lesson4_p">To truly grow your wealth, your investments must consistently earn more than inflation (avg. 6.3%). Equities and Gold have achieved this, while fixed income has often struggled to do so.</p></div>
+                        </div>
+                    </section>
+                    <section class="bg-white rounded-lg shadow-xl p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#0A2463]" data-lang-key="rtw_datatable_title">Detailed Year-on-Year Performance Data</h2>
+                        <p class="text-sm md:text-base text-gray-600 text-center mb-6 max-w-2xl mx-auto" data-lang-key="rtw_datatable_p">The following table provides the raw annual return data used for the analysis and visualizations on this page.</p>
+                        <div class="data-table-container rounded-lg border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100"><tr id="rtw_datatable_header"></tr></thead><tbody class="bg-white divide-y divide-gray-200" id="dataTableBody"></tbody></table>
+                        </div>
+                    </section>
+                </div>
+                <footer class="text-center mt-12 pt-8 border-t border-gray-300"><p class="text-gray-500 text-sm" data-lang-key="rtw_footer1">Data Source: Internal Research & Analytics - Geojit Insights. FY % Chg: On March Avg / Rates. FD: Prev Yr, Infl: FY '25, Feb. All values excl. taxes and transaction costs, if any. Investment of Rs.50000 invested every year (for 30 Yrs, from FY '96). Amount Invested: Rs.15 Lakhs.</p><p class="text-gray-500 text-sm mt-2" data-lang-key="rtw_footer2">This infographic is for illustrative purposes only and does not constitute financial advice. Past performance may not be repeated in the future.</p></footer>
+            </div>
+        </div>
+
+        <!-- Page 3: FD vs Debt Funds -->
+        <div id="fdVsDebtPage" class="page">
+            <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+                <header class="text-center my-8 md:my-12">
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold text-custom-blue mb-4" data-lang-key="fdd_title">Fixed Deposits vs. Debt Funds</h1>
+                    <p class="text-lg md:text-2xl text-custom-teal font-semibold" data-lang-key="fdd_subtitle">Choosing the Right Path for Your Savings: Predictable Safety or Market-Linked Growth?</p>
+                </header>
+                <section class="grid grid-cols-1 md:grid-cols-2 gap-8 my-8 md:my-16">
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border-l-8 border-custom-blue"><h2 class="text-2xl md:text-3xl font-bold text-custom-blue mb-4" data-lang-key="fdd_what_is_fd">What is a Fixed Deposit (FD)? 🛡️</h2><p class="text-base md:text-lg" data-lang-key="fdd_what_is_fd_p">An FD is a straightforward investment where you lend money to a bank for a fixed period at a pre-agreed interest rate. It's the go-to choice for conservative investors whose main priority is protecting their capital.</p><div class="mt-6 text-center bg-custom-peach text-custom-blue p-4 rounded-lg"><span class="text-4xl md:text-5xl font-bold">₹5 Lakh</span><p class="font-semibold" data-lang-key="fdd_fd_insurance">Insurance cover per depositor, per bank by DICGC.</p></div></div>
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border-l-8 border-custom-teal"><h2 class="text-2xl md:text-3xl font-bold text-custom-teal mb-4" data-lang-key="fdd_what_is_debt">What is a Debt Mutual Fund? 📈</h2><p class="text-base md:text-lg" data-lang-key="fdd_what_is_debt_p">A Debt Fund pools money from multiple investors to invest in a diversified portfolio of fixed-income securities like government bonds and corporate debt. Returns are linked to market performance, offering potential for higher growth.</p><div class="mt-6 text-center bg-custom-peach text-custom-blue p-4 rounded-lg"><span class="text-4xl md:text-5xl font-bold" data-lang-key="fdd_debt_diversified">Diversified</span><p class="font-semibold" data-lang-key="fdd_debt_managed">Portfolio managed by a professional fund manager.</p></div></div>
+                </section>
+                <section class="my-8 md:my-16 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-8" data-lang-key="fdd_risk_return_title">Risk vs. Potential Return: A Visual Comparison</h2>
+                    <p class="text-base md:text-lg text-center mb-8 max-w-3xl mx-auto" data-lang-key="fdd_risk_return_p">This chart compares the typical annual return range of FDs with various types of debt funds. While FDs offer fixed, predictable returns, debt funds provide a spectrum of risk and reward. Higher potential returns in debt funds come with higher market-linked risks.</p>
+                    <div class="chart-container"><canvas id="returnComparisonChart"></canvas></div>
+                </section>
+                <section class="my-8 md:my-16">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-12" data-lang-key="fdd_core_risks_title">Understanding the Core Risks</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg"><h3 class="text-xl md:text-2xl font-bold text-custom-orange mb-4" data-lang-key="fdd_credit_risk_title">Debt Fund: Credit Risk</h3><p class="text-base md:text-lg mb-6" data-lang-key="fdd_credit_risk_p">Credit risk is the chance that a bond issuer might default on payments. Fund managers mitigate this by diversifying across securities with different credit ratings. A higher allocation to 'AAA' rated bonds signifies a more conservative, lower-risk portfolio.</p><div class="chart-container h-64 md:h-80"><canvas id="creditRiskChart"></canvas></div></div>
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg"><h3 class="text-xl md:text-2xl font-bold text-custom-orange mb-4" data-lang-key="fdd_interest_risk_title">Debt Fund: Interest Rate Risk</h3><p class="text-base md:text-lg mb-6" data-lang-key="fdd_interest_risk_p">Interest rates and bond prices move in opposite directions. When the RBI raises rates, the price of existing bonds (and thus the fund's NAV) tends to fall. This chart illustrates the inverse relationship, which is a key risk for debt fund investors.</p><div class="chart-container h-64 md:h-80"><canvas id="interestRateRiskChart"></canvas></div></div>
+                    </div>
+                </section>
+                <section class="my-8 md:my-16 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-8" data-lang-key="fdd_taxation_title">The Taxation Showdown (Post-April 2023)</h2>
+                    <p class="text-base md:text-lg text-center mb-10 max-w-3xl mx-auto" data-lang-key="fdd_taxation_p">A significant change in tax laws has leveled the playing field between FDs and Debt Funds. For investments made after April 1, 2023, the tax treatment on gains is now identical, removing the previous long-term tax advantage debt funds held.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-start md:items-center gap-8">
+                        <div class="w-full md:w-1/2 flex flex-col items-center"><div class="p-4 bg-custom-blue text-white rounded-lg font-bold text-xl mb-4" data-lang-key="fdd_fd_interest">FD Interest</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-gray-200 text-custom-dark rounded-lg text-center my-4" data-lang-key="fdd_added_income">Added to Your Total Income</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-custom-orange text-white rounded-lg font-bold text-xl mt-4" data-lang-key="fdd_taxed_slab">Taxed at Your Slab Rate</div></div>
+                        <div class="w-full md:w-1/2 flex flex-col items-center"><div class="p-4 bg-custom-teal text-white rounded-lg font-bold text-xl mb-4" data-lang-key="fdd_debt_gains">Debt Fund Gains</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-gray-200 text-custom-dark rounded-lg text-center my-4" data-lang-key="fdd_added_income_2">Added to Your Total Income</div><div class="flow-arrow">⬇️</div><div class="p-4 bg-custom-orange text-white rounded-lg font-bold text-xl mt-4" data-lang-key="fdd_taxed_slab_2">Taxed at Your Slab Rate</div></div>
+                    </div>
+                </section>
+                <section class="my-8 md:my-16">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-12" data-lang-key="fdd_liquidity_title">Liquidity: Accessing Your Money</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg text-center"><span class="text-6xl mb-4 block">🔒</span><h3 class="text-xl md:text-2xl font-bold text-custom-blue mb-4" data-lang-key="fdd_liquidity_fd">Fixed Deposit</h3><p class="text-base md:text-lg" data-lang-key="fdd_liquidity_fd_p">You can withdraw early, but banks charge a penalty (typically 0.5% to 1.0%), which reduces your earnings. Tax-saver FDs are locked in for 5 years.</p></div>
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg text-center"><span class="text-6xl mb-4 block">🚪</span><h3 class="text-xl md:text-2xl font-bold text-custom-teal mb-4" data-lang-key="fdd_liquidity_debt">Debt Mutual Fund</h3><p class="text-base md:text-lg" data-lang-key="fdd_liquidity_debt_p">Highly liquid. You can redeem on any business day. Some funds might have a short exit load period, but many (like Liquid Funds) have none.</p></div>
+                    </div>
+                </section>
+                <section class="my-8 md:my-16 bg-custom-blue text-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center mb-8" data-lang-key="fdd_swp_title">Spotlight on Senior Citizens: The SWP Advantage</h2>
+                    <p class="text-base md:text-lg text-center mb-10 max-w-3xl mx-auto" data-lang-key="fdd_swp_p">For retirees, the Systematic Withdrawal Plan (SWP) in debt funds offers a powerful way to create a regular, pension-like income stream. It provides more flexibility than an FD's fixed interest payout and can be customized to your needs.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+                        <div class="p-4 md:p-6 bg-custom-teal rounded-lg font-bold text-lg md:text-xl" data-lang-key="fdd_swp_lumpsum">Your Lumpsum<br>Retirement Corpus</div><div class="flow-arrow text-white transform rotate-90 md:rotate-0">➡️</div>
+                        <div class="p-4 md:p-6 bg-custom-teal rounded-lg font-bold text-lg md:text-xl" data-lang-key="fdd_swp_invested">Invested in a<br>Low-Risk Debt Fund</div><div class="flow-arrow text-white transform rotate-90 md:rotate-0">➡️</div>
+                        <div class="p-4 md:p-6 bg-custom-orange rounded-lg font-bold text-lg md:text-xl" data-lang-key="fdd_swp_payout">Fixed Monthly<br>Payout (SWP)</div>
+                    </div>
+                </section>
+                
+                <section class="my-8 md:my-16 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-8" data-lang-key="fdd_swp_calc_title">SWP Calculator: How Much Can You Withdraw?</h2>
+                    <p class="text-base md:text-lg text-center mb-10 max-w-3xl mx-auto" data-lang-key="fdd_swp_calc_p">This calculation shows how much monthly income a <strong>₹1 Crore</strong> corpus could generate, assuming the withdrawal amount is increased by <strong>6% each year</strong> to counter inflation. We'll start with an initial withdrawal of <strong>₹50,000 per month</strong> (a 6% annual rate).</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-custom-blue mb-4" data-lang-key="fdd_swp_scenario1_h">Scenario 1: Conservative Growth (7% Return)</h3>
+                            <p class="mb-4" data-lang-key="fdd_swp_scenario1_p">With returns just slightly above the withdrawal step-up rate, the corpus depletes over time.</p>
+                            <div id="swp-table-7" class="data-table-container rounded-lg border border-gray-200"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold text-custom-teal mb-4" data-lang-key="fdd_swp_scenario2_h">Scenario 2: Moderate Growth (10% Return)</h3>
+                            <p class="mb-4" data-lang-key="fdd_swp_scenario2_p">With returns significantly higher than the step-up rate, the corpus continues to grow despite the withdrawals.</p>
+                            <div id="swp-table-10" class="data-table-container rounded-lg border border-gray-200"></div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-center text-custom-blue mt-12 mb-4" data-lang-key="fdd_swp_corpus_chart_title">Corpus Value Over Time</h3>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="swpProjectionChart"></canvas>
+                    </div>
+                </section>
+
+                <footer class="my-8 md:my-16">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-custom-blue mb-12" data-lang-key="fdd_verdict_title">The Final Verdict: Which is for You?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-8 border-custom-blue"><h3 class="text-xl md:text-2xl font-bold text-custom-blue mb-4" data-lang-key="fdd_verdict_fd_h">Choose a Fixed Deposit If...</h3><ul class="text-base md:text-lg space-y-2 list-disc list-inside" data-lang-key="fdd_verdict_fd_ul"><li>Your #1 priority is capital safety.</li><li>You want 100% predictable, guaranteed returns.</li><li>You prefer a simple, hands-off investment.</li><li>You are highly risk-averse.</li></ul></div>
+                        <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-8 border-custom-teal"><h3 class="text-xl md:text-2xl font-bold text-custom-teal mb-4" data-lang-key="fdd_verdict_debt_h">Choose a Debt Fund If...</h3><ul class="text-base md:text-lg space-y-2 list-disc list-inside" data-lang-key="fdd_verdict_debt_ul"><li>You seek potentially higher, market-linked returns.</li><li>You understand and accept moderate risks.</li><li>You need high liquidity and flexibility.</li><li>You want to generate regular income via SWP.</li></ul></div>
+                    </div>
+
+                    <div class="mt-16 bg-custom-blue text-white p-6 md:p-8 rounded-xl shadow-lg max-w-4xl mx-auto text-center">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4" data-lang-key="fdd_did_you_know">Do You Know?</h2>
+                        <p class="text-lg md:text-2xl leading-relaxed" data-lang-key="fdd_did_you_know_p">
+                            Keeping <span class="font-extrabold text-custom-peach">₹1 lakh</span> in a savings account means 
+                            losing <span class="font-extrabold text-custom-peach">₹10 every day</span> as potential
+                            earnings from <span class="font-extrabold text-white underline decoration-custom-peach">Liquid Funds.</span>
+                        </p>
+                    </div>
+
+                    <p class="text-center mt-12 text-gray-500 text-sm" data-lang-key="fdd_footer">Disclaimer: This infographic is for educational purposes only. Mutual fund investments are subject to market risks. Please consult a financial advisor before making any investment decisions.</p>
+                </footer>
+            </div>
+        </div>
+        
+        <!-- Page 4: The Magic of Compounding -->
+        <div id="theMagicPage" class="page">
+             <div class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-8 md:mb-12">
+                    <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-[#006494] mb-2" data-lang-key="magic_title">The Magic of Long-Term Investing</h1>
+                    <p class="text-base md:text-xl text-[#0582CA] max-w-3xl mx-auto" data-lang-key="magic_subtitle">Discover how a consistent, small investment can grow into a fortune over 25 years through the power of compounding.</p>
+                </header>
+                <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div class="kpi-card bg-[#00A6FB]">
+                                <span class="kpi-value">₹5,000</span>
+                                <span class="kpi-label" data-lang-key="magic_kpi1">Monthly Investment</span>
+                            </div>
+                            <div class="kpi-card bg-[#0582CA]">
+                                <span class="kpi-value">25</span>
+                                <span class="kpi-label" data-lang-key="magic_kpi2">Years of Patience</span>
+                            </div>
+                            <div class="kpi-card bg-[#006494]">
+                                <span class="kpi-value">~₹5 Cr</span>
+                                <span class="kpi-label" data-lang-key="magic_kpi3">Final Corpus</span>
+                            </div>
+                        </div>
+                         <p class="text-center mt-6 text-gray-600" data-lang-key="magic_kpi_p">This infographic analyzes data showing a monthly Systematic Investment Plan (SIP) of ₹5,000 in a top-performing fund turning into nearly ₹5 Crore, showcasing a remarkable 22.7% annualized return.</p>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1" data-lang-key="magic_fund_compare_title">Fund Performance Comparison</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto" data-lang-key="magic_fund_compare_p">While many funds performed well, some significantly outpaced others. The chart below ranks various funds by their final corpus after 25 years, clearly showing the difference in returns. The NIFTY 50 benchmark is included for comparison.</p>
+                        <div class="chart-container h-[400px] md:h-[500px] max-h-[60vh]">
+                            <canvas id="fundPerformanceChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1" data-lang-key="magic_category_compare_title">Choosing Your Path: SIP Performance by Category</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto" data-lang-key="magic_category_compare_p">Different fund categories offer varying levels of risk and return. Historically, small-cap funds have offered the highest returns, but also come with the highest volatility. This makes them suitable for experienced investors with a long-term horizon, while new investors might prefer the stability of large-cap funds.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div class="chart-container h-[350px] md:h-[450px]">
+                                <canvas id="categoryPerformanceChart"></canvas>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="category-item" style="border-color: #FD5900;"><h3 class="font-bold text-lg" data-lang-key="magic_cat1_h">Small Cap (17.6%)</h3><p class="text-gray-600" data-lang-key="magic_cat1_p">Best for: Supplementary, high-risk, long-term (7+ yrs), only a small allocation.</p></div>
+                                <div class="category-item" style="border-color: #FBAF00;"><h3 class="font-bold text-lg" data-lang-key="magic_cat2_h">Mid Cap (16.1%)</h3><p class="text-gray-600" data-lang-key="magic_cat2_p">Best for: Supplementary; higher risk-return, 7+ years, high volatility tolerance.</p></div>
+                                <div class="category-item" style="border-color: #00A6FB;"><h3 class="font-bold text-lg" data-lang-key="magic_cat3_h">Value Oriented (15.5%)</h3><p class="text-gray-600" data-lang-key="magic_cat3_p">Best for: Core portfolio; value style, flexible allocation, min. 5 years.</p></div>
+                                <div class="category-item" style="border-color: #0582CA;"><h3 class="font-bold text-lg" data-lang-key="magic_cat4_h">Flexi Cap (14.7%)</h3><p class="text-gray-600" data-lang-key="magic_cat4_p">Best for: Core portfolio; flexible across caps/sectors, min. 5 years.</p></div>
+                                 <div class="category-item" style="border-color: #006494;"><h3 class="font-bold text-lg" data-lang-key="magic_cat5_h">Large & Mid Cap (13.7%)</h3><p class="text-gray-600" data-lang-key="magic_cat5_p">Best for: Core portfolio; diversified market-cap exposure, min. 5 years.</p></div>
+                                  <div class="category-item" style="border-color: #6b7280;"><h3 class="font-bold text-lg" data-lang-key="magic_cat6_h">Large Cap (12.2%)</h3><p class="text-gray-600" data-lang-key="magic_cat6_p">Best for: New investors, low volatility tolerance, min. 5-year horizon.</p></div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1" data-lang-key="magic_anatomy_title">Anatomy of Growth</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto" data-lang-key="magic_anatomy_p">Focusing on the top-performing Nippon India Growth fund, this chart visualizes the exponential power of compounding. The total invested amount of ₹0.15 Crore is dwarfed by the immense growth it generates over 25 years.</p>
+                        <div class="chart-container"><canvas id="sipGrowthChart"></canvas></div>
+                    </section>
+                    <aside class="bg-white p-6 rounded-lg shadow-lg flex flex-col justify-center">
+                        <h2 class="text-2xl font-bold text-center mb-4" data-lang-key="magic_rules_title">Golden Rules for Wealth Creation</h2>
+                        <div class="space-y-4">
+                            <div class="flowchart-step"><div class="flowchart-icon bg-[#00A6FB]">📈</div><div class="ml-4"><h3 class="font-bold text-lg" data-lang-key="magic_rule1_h">Start Early</h3><p class="text-gray-600" data-lang-key="magic_rule1_p">The longer your money works for you, the greater the compounding effect.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#0582CA]">🗓️</div><div class="ml-4"><h3 class="font-bold text-lg" data-lang-key="magic_rule2_h">Be Consistent</h3><p class="text-gray-600" data-lang-key="magic_rule2_p">A disciplined monthly SIP builds wealth steadily, rain or shine.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#006494]">🧘</div><div class="ml-4"><h3 class="font-bold text-lg" data-lang-key="magic_rule3_h">Stay Invested</h3><p class="text-gray-600" data-lang-key="magic_rule3_p">Ignore short-term noise and market dips. Patience is rewarded.</p></div></div>
+                             <div class="flowchart-step"><div class="flowchart-icon bg-[#FBAF00]">🚀</div><div class="ml-4"><h3 class="font-bold text-lg" data-lang-key="magic_rule4_h">Step-Up Your SIP</h3><p class="text-gray-600" data-lang-key="magic_rule4_p">Increase your investment annually to accelerate your journey to wealth.</p></div></div>
+                        </div>
+                    </aside>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1" data-lang-key="magic_stepup_title">Regular vs. Step-Up SIP: The Accelerator Effect</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto" data-lang-key="magic_stepup_p">Increasing your SIP amount by just 10% each year (a "Step-Up SIP") can have a colossal impact on your final wealth. While investing more, the final corpus grows disproportionately larger, from ₹5 Crore to a potential ₹8 Crore.</p>
+                        <div class="chart-container"><canvas id="stepUpComparisonChart"></canvas></div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold text-center mb-1" data-lang-key="magic_drawdown_title">Embracing Volatility: Don't Fear the Dips</h2>
+                        <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto" data-lang-key="magic_drawdown_p">The path to wealth is never a straight line. This chart shows the significant temporary declines (drawdowns) the top fund experienced. Staying invested during these periods is crucial, as it allows you to buy more units at a lower price, supercharging long-term returns.</p>
+                        <div class="chart-container"><canvas id="drawdownChart"></canvas></div>
+                    </section>
+                </main>
+                <footer class="text-center mt-12 text-gray-500 text-sm"><p data-lang-key="magic_footer1">Data Source: ACEMF & Value Research, as published in businessline. Returns as of Dec 31, 2024.</p><p data-lang-key="magic_footer2">This infographic is for illustrative purposes only and does not constitute financial advice.</p></footer>
+            </div>
+        </div>
+
+        <!-- Page 5: Market Uncertainty -->
+        <div id="marketUncertaintyPage" class="page bg-gray-100">
+             <main class="container mx-auto p-4 md:p-8">
+                <header class="text-center mb-8 md:mb-12">
+                    <h1 class="text-3xl md:text-5xl font-black text-[#003f5c] mb-2" data-lang-key="mu_title">The Unshakable Case for Staying Invested</h1>
+                    <p class="text-base md:text-lg text-gray-600 max-w-3xl mx-auto" data-lang-key="mu_subtitle">An interactive data story on why discipline, not timing, is the key to long-term growth amidst economic storms.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#003f5c] mb-2" data-lang-key="mu_drumbeat_title">The Constant Drumbeat of Uncertainty</h2>
+                        <p class="text-gray-600 mb-6" data-lang-key="mu_drumbeat_p">News headlines often portray economic uncertainty as a unique, unprecedented crisis. However, a look at the Economic Policy Uncertainty Index reveals that volatility is a recurring feature of the global landscape. Major events consistently cause spikes, but the market has always adapted and moved forward.</p>
+                        <div class="chart-container"><canvas id="uncertaintyChart"></canvas></div>
+                    </section>
+                    <section class="lg:col-span-3 bg-white rounded-xl shadow-lg p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#dd5182] mb-2" data-lang-key="mu_cost_fear_title">The Devastating Cost of Fear</h2>
+                        <p class="text-gray-600 mb-6" data-lang-key="mu_cost_fear_p">When uncertainty spikes, the natural instinct is to sell and seek safety. This attempt to 'time the market' is often disastrous, as the market's best days frequently follow its worst. Missing just a handful of these critical recovery days can cripple long-term returns, as shown by the 10-year growth of a ₹1 lakh investment in the Sensex.</p>
+                        <div class="chart-container"><canvas id="marketTimingChart"></canvas></div>
+                    </section>
+                    <div class="bg-[#003f5c] text-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center items-center text-center"><span class="text-4xl md:text-6xl font-black tracking-tighter">₹3.17 Lakh</span><span class="text-base md:text-lg mt-2 font-semibold text-blue-200" data-lang-key="mu_kpi1">Value after 10 years when staying fully invested.</span></div>
+                    <div class="bg-[#dd5182] text-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center items-center text-center"><span class="text-4xl md:text-6xl font-black tracking-tighter">₹1.40 Lakh</span><span class="text-base md:text-lg mt-2 font-semibold text-red-200" data-lang-key="mu_kpi2">Value after missing just the 20 best days.</span></div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center items-center text-center"><span class="text-4xl md:text-6xl font-black tracking-tighter text-[#ff6e54]">56%</span><span class="text-base md:text-lg mt-2 font-semibold text-gray-600" data-lang-key="mu_kpi3">Potential loss in returns from missing 20 days.</span></div>
+                     <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#ff6e54] mb-2" data-lang-key="mu_resilience_title">Resilience in Crisis: Market Returns After Major Events</h2>
+                        <p class="text-gray-600 mb-6" data-lang-key="mu_resilience_p">History shows that periods of geopolitical crisis, while unsettling, are often followed by strong market performance. The data below illustrates the annualized returns (CAGR) since various major events. Notice how, across the board, markets have recovered and generated positive returns, especially in the mid and small-cap segments.</p>
+                        <div class="chart-container" style="height: 400px; md:height: 60vh; max-height: 700px;"><canvas id="eventReturnsChart"></canvas></div>
+                    </section>
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#955196] mb-2" data-lang-key="mu_gap_title">The Behavioural Gap: Why We Make Mistakes</h2>
+                        <p class="text-gray-600 mb-6" data-lang-key="mu_gap_p">The gap between an investor's expectation of smooth, linear growth and the reality of a volatile market leads to poor decisions. We buy high during euphoria and sell low during panic. Warren Buffett said it best: "Risk comes from not knowing what you're doing." Understanding this gap is the first step toward overcoming it.</p>
+                        <div class="chart-container" style="height: 250px; md:height: 400px;"><canvas id="behaviouralGapChart"></canvas></div>
+                    </section>
+                    <section class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-4 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#003f5c] text-center mb-8" data-lang-key="mu_strategy_title">The Winning Strategy: A Disciplined Path Forward</h2>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="text-center p-4"><div class="bg-blue-100 text-[#003f5c] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">🗓️</div><h3 class="text-xl font-bold text-gray-800" data-lang-key="mu_strategy1_h">Acknowledge Uncertainty</h3><p class="text-gray-600" data-lang-key="mu_strategy1_p">Accept that volatility is a normal part of investing, not a sign to abandon your strategy.</p></div>
+                            <div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-red-100 text-[#dd5182] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">🏃‍♂️</div><h3 class="text-xl font-bold text-gray-800" data-lang-key="mu_strategy2_h">Resist Market Timing</h3><p class="text-gray-600" data-lang-key="mu_strategy2_p">The data proves that trying to predict highs and lows is a losing game. Don't play it.</p></div>
+                            <div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-purple-100 text-[#955196] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">⏳</div><h3 class="text-xl font-bold text-gray-800" data-lang-key="mu_strategy3_h">Stay Disciplined</h3><p class="text-gray-600" data-lang-key="mu_strategy3_p">The most powerful tool is patience. Let time and compounding work for you.</p></div>
+                            <div class="text-gray-300 text-3xl font-light md:hidden">↓</div>
+                            <div class="text-center p-4"><div class="bg-green-100 text-green-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl">📈</div><h3 class="text-xl font-bold text-gray-800" data-lang-key="mu_strategy4_h">Achieve Growth</h3><p class="text-gray-600" data-lang-key="mu_strategy4_p">By staying the course, you position yourself to capture the full long-term returns of the market.</p></div>
+                        </div>
+                    </section>
+                </div>
+                <footer class="text-center mt-12 text-sm text-gray-500"><p data-lang-key="mu_footer1">Data Sources: Baker, Bloom & Davis; Sensex Historical Data; Bajaj Finserv Asset Management Limited.</p><p data-lang-key="mu_footer2">This infographic is for illustrative purposes only and does not constitute financial advice.</p></footer>
+            </main>
+        </div>
+    </main>
+    
+    <button id="lang-toggle" class="fixed bottom-5 right-5 bg-blue-600 text-white py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-20">
+        English
+    </button>
+
+
+    <script>
+        // --- TRANSLATIONS OBJECT ---
+        const translations = {
+            en: {
+                pageTitle: "Financial Infographics Dashboard",
+                tabMutualFundsExplained: "Mutual Funds Explained",
+                tabRaceToWealth: "Race to Wealth",
+                tabFdVsDebt: "FD vs Debt Funds",
+                tabTheMagic: "The Magic of Compounding",
+                tabMarketUncertainty: "Market Uncertainty",
+                mfe_title: "Mutual Funds Explained",
+                mfe_subtitle: "Your simplified guide to understanding how to make your money work for you through collective investing.",
+                mfe_what_is_idea: "What's the Big Idea?",
+                mfe_what_is_idea_p: "Investing on your own can be tough. It requires a lot of money to buy shares in many different companies. A mutual fund solves this by pooling money from many people to invest on a large scale. Think of it as financial teamwork.",
+                mfe_process_nutshell: "The Process in a Nutshell",
+                mfe_investors: "Investors",
+                mfe_pooled_money: "Pooled Money",
+                mfe_stocks_bonds: "Stocks & Bonds",
+                mfe_diversification_p: "A mutual fund instantly diversifies your investment across many assets, reducing risk compared to holding a single stock.",
+                mfe_key_advantages: "Key Advantages: Why It's a Smart Move",
+                mfe_adv_diversification: "Instant Diversification",
+                mfe_adv_diversification_p: "Don't put all your eggs in one basket. Your money is spread across many investments, lowering risk.",
+                mfe_adv_management: "Professional Management",
+                mfe_adv_management_p: "Full-time experts research and manage the portfolio for you. No need to be a market guru.",
+                mfe_adv_affordability: "Affordability",
+                mfe_adv_affordability_p: "Start investing with as little as ₹500 via a Systematic Investment Plan (SIP).",
+                mfe_adv_liquidity: "High Liquidity",
+                mfe_adv_liquidity_p: "Easily buy or sell your fund units on any business day at the current market value (NAV).",
+                mfe_portfolio_compare: "What's in the Portfolio? Comparing Fund Types",
+                mfe_risk_return: "Risk vs. Potential Return",
+                mfe_risk_return_p: "Different fund types offer different levels of risk and potential for growth. Equity funds are higher risk but offer higher potential returns, while debt funds are safer.",
+                mfe_hybrid_funds: "Hybrid Funds: A Balanced Approach",
+                mfe_hybrid_funds_p: "Hybrid funds mix stocks (equity) and bonds (debt) to balance risk. The mix changes based on the fund's objective.",
+                mfe_how_money_grows: "How Your Money Grows",
+                mfe_nav_growth: "Capital Appreciation (NAV Growth)",
+                mfe_nav_growth_p: "The main way you earn is through the growth of your investment's value. The Net Asset Value (NAV) is the price of one unit of a fund. As the value of the fund's investments (stocks, bonds) goes up, the NAV increases. You profit when you sell your units at a higher price.",
+                mfe_nav_growth_illustrative: "Illustrative growth of NAV over time.",
+                mfe_fine_print: "The Fine Print: What to Know",
+                mfe_expense_ratio: "Expense Ratio",
+                mfe_expense_ratio_p: "A small annual fee (usually 1-2%) charged by the fund to cover the costs of professional management and operations. This is automatically deducted from your investment's value.",
+                mfe_market_risk: "Market Risk",
+                mfe_market_risk_p: "Remember, returns are not guaranteed. The value of your investment (NAV) will fluctuate based on market performance. Investing for the long term helps ride out these ups and downs.",
+                mfe_exit_load: "Exit Load",
+                mfe_exit_load_p: "Some funds charge a fee if you sell your units within a short period (like one year). This is to encourage long-term investment rather than short-term speculation.",
+                mfe_footer: "This infographic is for educational purposes only and does not constitute financial advice. All data is illustrative.",
+                rtw_title: "The 30-Year Race to Wealth",
+                rtw_subtitle: "An analysis of where a ₹50,000 annual investment would have taken you over three decades (FY 1996 - FY 2025).",
+                rtw_final_tally: "The Final Tally: Where Your Money Would've Grown",
+                rtw_nifty_label: "NIFTY-500 (EQUITY)",
+                rtw_nifty_sub: "Highest Growth",
+                rtw_gold_label: "GOLD",
+                rtw_gold_sub: "Top Performing Commodity",
+                rtw_ppf_sub: "Stable & Secure",
+                rtw_silver_sub: "Most Volatile",
+                rtw_cagr_title: "Long-Term Growth Engine: CAGR",
+                rtw_cagr_p: "The Compound Annual Growth Rate (CAGR) reveals the true average return of an investment over time. Equities have significantly outpaced other asset classes, demonstrating their power for wealth creation.",
+                rtw_annual_returns_title: "The Volatile Journey: Annual Returns",
+                rtw_annual_returns_p: "This chart plots the turbulent ride of key asset classes against the steady rise of inflation. While equities (Nifty-500) show sharp peaks and valleys, their long-term trend is strongly upward. Gold often surges when equities falter, showcasing its role as a hedge.",
+                rtw_risk_reward_title: "Risk vs. Reward: A Double-Edged Sword",
+                rtw_risk_reward_p: "High rewards often come with high risks. This chart shows how many times each asset was the year's best performer versus its worst. Silver's profile is striking—a frequent winner, but also the most frequent loser, highlighting extreme volatility.",
+                rtw_lessons_title: "Key Investment Lessons from 30 Years",
+                rtw_lesson1_h: "📈 Risk Defines Reward",
+                rtw_lesson1_p: "The highest long-term wealth was created in equities, which also experienced the most significant short-term drawdowns. Accepting volatility is essential for high growth.",
+                rtw_lesson2_h: "⏳ Time is Your Ally",
+                rtw_lesson2_p: "Over 30 years, the power of compounding in high-growth assets smooths out short-term market noise. Staying invested is more important than timing the market.",
+                rtw_lesson3_h: "🛡️ Diversification Matters",
+                rtw_lesson3_p: "No single asset wins every year. When equities fell, Gold often rose. A diversified portfolio can cushion against downturns in any single asset class.",
+                rtw_lesson4_h: "💰 Beat Inflation to Win",
+                rtw_lesson4_p: "To truly grow your wealth, your investments must consistently earn more than inflation (avg. 6.3%). Equities and Gold have achieved this, while fixed income has often struggled to do so.",
+                rtw_datatable_title: "Detailed Year-on-Year Performance Data",
+                rtw_datatable_p: "The following table provides the raw annual return data used for the analysis and visualizations on this page.",
+                rtw_footer1: "Data Source: Internal Research & Analytics - Geojit Insights. FY % Chg: On March Avg / Rates. FD: Prev Yr, Infl: FY '25, Feb. All values excl. taxes and transaction costs, if any. Investment of Rs.50000 invested every year (for 30 Yrs, from FY '96). Amount Invested: Rs.15 Lakhs.",
+                rtw_footer2: "This infographic is for illustrative purposes only and does not constitute financial advice. Past performance may not be repeated in the future.",
+                fdd_title: "Fixed Deposits vs. Debt Funds",
+                fdd_subtitle: "Choosing the Right Path for Your Savings: Predictable Safety or Market-Linked Growth?",
+                fdd_what_is_fd: "What is a Fixed Deposit (FD)? 🛡️",
+                fdd_what_is_fd_p: "An FD is a straightforward investment where you lend money to a bank for a fixed period at a pre-agreed interest rate. It's the go-to choice for conservative investors whose main priority is protecting their capital.",
+                fdd_fd_insurance: "Insurance cover per depositor, per bank by DICGC.",
+                fdd_what_is_debt: "What is a Debt Mutual Fund? 📈",
+                fdd_what_is_debt_p: "A Debt Fund pools money from multiple investors to invest in a diversified portfolio of fixed-income securities like government bonds and corporate debt. Returns are linked to market performance, offering potential for higher growth.",
+                fdd_debt_diversified: "Diversified",
+                fdd_debt_managed: "Portfolio managed by a professional fund manager.",
+                fdd_risk_return_title: "Risk vs. Potential Return: A Visual Comparison",
+                fdd_risk_return_p: "This chart compares the typical annual return range of FDs with various types of debt funds. While FDs offer fixed, predictable returns, debt funds provide a spectrum of risk and reward. Higher potential returns in debt funds come with higher market-linked risks.",
+                fdd_core_risks_title: "Understanding the Core Risks",
+                fdd_credit_risk_title: "Debt Fund: Credit Risk",
+                fdd_credit_risk_p: "Credit risk is the chance that a bond issuer might default on payments. Fund managers mitigate this by diversifying across securities with different credit ratings. A higher allocation to 'AAA' rated bonds signifies a more conservative, lower-risk portfolio.",
+                fdd_interest_risk_title: "Debt Fund: Interest Rate Risk",
+                fdd_interest_risk_p: "Interest rates and bond prices move in opposite directions. When the RBI raises rates, the price of existing bonds (and thus the fund's NAV) tends to fall. This chart illustrates the inverse relationship, which is a key risk for debt fund investors.",
+                fdd_taxation_title: "The Taxation Showdown (Post-April 2023)",
+                fdd_taxation_p: "A significant change in tax laws has leveled the playing field between FDs and Debt Funds. For investments made after April 1, 2023, the tax treatment on gains is now identical, removing the previous long-term tax advantage debt funds held.",
+                fdd_fd_interest: "FD Interest",
+                fdd_added_income: "Added to Your Total Income",
+                fdd_taxed_slab: "Taxed at Your Slab Rate",
+                fdd_debt_gains: "Debt Fund Gains",
+                fdd_added_income_2: "Added to Your Total Income",
+                fdd_taxed_slab_2: "Taxed at Your Slab Rate",
+                fdd_liquidity_title: "Liquidity: Accessing Your Money",
+                fdd_liquidity_fd: "Fixed Deposit",
+                fdd_liquidity_fd_p: "You can withdraw early, but banks charge a penalty (typically 0.5% to 1.0%), which reduces your earnings. Tax-saver FDs are locked in for 5 years.",
+                fdd_liquidity_debt: "Debt Mutual Fund",
+                fdd_liquidity_debt_p: "Highly liquid. You can redeem on any business day. Some funds might have a short exit load period, but many (like Liquid Funds) have none.",
+                fdd_swp_title: "Spotlight on Senior Citizens: The SWP Advantage",
+                fdd_swp_p: "For retirees, the Systematic Withdrawal Plan (SWP) in debt funds offers a powerful way to create a regular, pension-like income stream. It provides more flexibility than an FD's fixed interest payout and can be customized to your needs.",
+                fdd_swp_lumpsum: "Your Lumpsum<br>Retirement Corpus",
+                fdd_swp_invested: "Invested in a<br>Low-Risk Debt Fund",
+                fdd_swp_payout: "Fixed Monthly<br>Payout (SWP)",
+                fdd_swp_calc_title: "SWP Calculator: How Much Can You Withdraw?",
+                fdd_swp_calc_p: "This calculation shows how much monthly income a <strong>₹1 Crore</strong> corpus could generate, assuming the withdrawal amount is increased by <strong>6% each year</strong> to counter inflation. We'll start with an initial withdrawal of <strong>₹50,000 per month</strong> (a 6% annual rate).",
+                fdd_swp_scenario1_h: "Scenario 1: Conservative Growth (7% Return)",
+                fdd_swp_scenario1_p: "With returns just slightly above the withdrawal step-up rate, the corpus depletes over time.",
+                fdd_swp_scenario2_h: "Scenario 2: Moderate Growth (10% Return)",
+                fdd_swp_scenario2_p: "With returns significantly higher than the step-up rate, the corpus continues to grow despite the withdrawals.",
+                fdd_swp_corpus_chart_title: "Corpus Value Over Time",
+                fdd_swp_year_label: "Year",
+                fdd_verdict_title: "The Final Verdict: Which is for You?",
+                fdd_verdict_fd_h: "Choose a Fixed Deposit If...",
+                fdd_verdict_fd_ul: "<li>Your #1 priority is capital safety.</li><li>You want 100% predictable, guaranteed returns.</li><li>You prefer a simple, hands-off investment.</li><li>You are highly risk-averse.</li>",
+                fdd_verdict_debt_h: "Choose a Debt Fund If...",
+                fdd_verdict_debt_ul: "<li>You seek potentially higher, market-linked returns.</li><li>You understand and accept moderate risks.</li><li>You need high liquidity and flexibility.</li><li>You want to generate regular income via SWP.</li>",
+                fdd_did_you_know: "Do You Know?",
+                fdd_did_you_know_p: "Keeping <span class=\"font-extrabold text-custom-peach\">₹1 lakh</span> in a savings account means losing <span class=\"font-extrabold text-custom-peach\">₹10 every day</span> as potential earnings from <span class=\"font-extrabold text-white underline decoration-custom-peach\">Liquid Funds.</span>",
+                fdd_footer: "Disclaimer: This infographic is for educational purposes only. Mutual fund investments are subject to market risks. Please consult a financial advisor before making any investment decisions.",
+                magic_title: "The Magic of Long-Term Investing",
+                magic_subtitle: "Discover how a consistent, small investment can grow into a fortune over 25 years through the power of compounding.",
+                magic_kpi1: "Monthly Investment",
+                magic_kpi2: "Years of Patience",
+                magic_kpi3: "Final Corpus",
+                magic_kpi_p: "This infographic analyzes data showing a monthly Systematic Investment Plan (SIP) of ₹5,000 in a top-performing fund turning into nearly ₹5 Crore, showcasing a remarkable 22.7% annualized return.",
+                magic_fund_compare_title: "Fund Performance Comparison",
+                magic_fund_compare_p: "While many funds performed well, some significantly outpaced others. The chart below ranks various funds by their final corpus after 25 years, clearly showing the difference in returns. The NIFTY 50 benchmark is included for comparison.",
+                magic_category_compare_title: "Choosing Your Path: SIP Performance by Category",
+                magic_category_compare_p: "Different fund categories offer varying levels of risk and return. Historically, small-cap funds have offered the highest returns, but also come with the highest volatility. This makes them suitable for experienced investors with a long-term horizon, while new investors might prefer the stability of large-cap funds.",
+                magic_cat1_h: "Small Cap (17.6%)",
+                magic_cat1_p: "Best for: Supplementary, high-risk, long-term (7+ yrs), only a small allocation.",
+                magic_cat2_h: "Mid Cap (16.1%)",
+                magic_cat2_p: "Best for: Supplementary; higher risk-return, 7+ years, high volatility tolerance.",
+                magic_cat3_h: "Value Oriented (15.5%)",
+                magic_cat3_p: "Best for: Core portfolio; value style, flexible allocation, min. 5 years.",
+                magic_cat4_h: "Flexi Cap (14.7%)",
+                magic_cat4_p: "Best for: Core portfolio; flexible across caps/sectors, min. 5 years.",
+                magic_cat5_h: "Large & Mid Cap (13.7%)",
+                magic_cat5_p: "Best for: Core portfolio; diversified market-cap exposure, min. 5 years.",
+                magic_cat6_h: "Large Cap (12.2%)",
+                magic_cat6_p: "Best for: New investors, low volatility tolerance, min. 5-year horizon.",
+                magic_anatomy_title: "Anatomy of Growth",
+                magic_anatomy_p: "Focusing on the top-performing Nippon India Growth fund, this chart visualizes the exponential power of compounding. The total invested amount of ₹0.15 Crore is dwarfed by the immense growth it generates over 25 years.",
+                magic_rules_title: "Golden Rules for Wealth Creation",
+                magic_rule1_h: "Start Early",
+                magic_rule1_p: "The longer your money works for you, the greater the compounding effect.",
+                magic_rule2_h: "Be Consistent",
+                magic_rule2_p: "A disciplined monthly SIP builds wealth steadily, rain or shine.",
+                magic_rule3_h: "Stay Invested",
+                magic_rule3_p: "Ignore short-term noise and market dips. Patience is rewarded.",
+                magic_rule4_h: "Step-Up Your SIP",
+                magic_rule4_p: "Increase your investment annually to accelerate your journey to wealth.",
+                magic_stepup_title: "Regular vs. Step-Up SIP: The Accelerator Effect",
+                magic_stepup_p: "Increasing your SIP amount by just 10% each year (a \"Step-Up SIP\") can have a colossal impact on your final wealth. While investing more, the final corpus grows disproportionately larger, from ₹5 Crore to a potential ₹8 Crore.",
+                magic_drawdown_title: "Embracing Volatility: Don't Fear the Dips",
+                magic_drawdown_p: "The path to wealth is never a straight line. This chart shows the significant temporary declines (drawdowns) the top fund experienced. Staying invested during these periods is crucial, as it allows you to buy more units at a lower price, supercharging long-term returns.",
+                magic_footer1: "Data Source: ACEMF & Value Research, as published in businessline. Returns as of Dec 31, 2024.",
+                magic_footer2: "This infographic is for illustrative purposes only and does not constitute financial advice.",
+                mu_title: "The Unshakable Case for Staying Invested",
+                mu_subtitle: "An interactive data story on why discipline, not timing, is the key to long-term growth amidst economic storms.",
+                mu_drumbeat_title: "The Constant Drumbeat of Uncertainty",
+                mu_drumbeat_p: "News headlines often portray economic uncertainty as a unique, unprecedented crisis. However, a look at the Economic Policy Uncertainty Index reveals that volatility is a recurring feature of the global landscape. Major events consistently cause spikes, but the market has always adapted and moved forward.",
+                mu_cost_fear_title: "The Devastating Cost of Fear",
+                mu_cost_fear_p: "When uncertainty spikes, the natural instinct is to sell and seek safety. This attempt to 'time the market' is often disastrous, as the market's best days frequently follow its worst. Missing just a handful of these critical recovery days can cripple long-term returns, as shown by the 10-year growth of a ₹1 lakh investment in the Sensex.",
+                mu_kpi1: "Value after 10 years when staying fully invested.",
+                mu_kpi2: "Value after missing just the 20 best days.",
+                mu_kpi3: "Potential loss in returns from missing 20 days.",
+                mu_resilience_title: "Resilience in Crisis: Market Returns After Major Events",
+                mu_resilience_p: "History shows that periods of geopolitical crisis, while unsettling, are often followed by strong market performance. The data below illustrates the annualized returns (CAGR) since various major events. Notice how, across the board, markets have recovered and generated positive returns, especially in the mid and small-cap segments.",
+                mu_gap_title: "The Behavioural Gap: Why We Make Mistakes",
+                mu_gap_p: "The gap between an investor's expectation of smooth, linear growth and the reality of a volatile market leads to poor decisions. We buy high during euphoria and sell low during panic. Warren Buffett said it best: \"Risk comes from not knowing what you're doing.\" Understanding this gap is the first step toward overcoming it.",
+                mu_strategy_title: "The Winning Strategy: A Disciplined Path Forward",
+                mu_strategy1_h: "Acknowledge Uncertainty",
+                mu_strategy1_p: "Accept that volatility is a normal part of investing, not a sign to abandon your strategy.",
+                mu_strategy2_h: "Resist Market Timing",
+                mu_strategy2_p: "The data proves that trying to predict highs and lows is a losing game. Don't play it.",
+                mu_strategy3_h: "Stay Disciplined",
+                mu_strategy3_p: "The most powerful tool is patience. Let time and compounding work for you.",
+                mu_strategy4_h: "Achieve Growth",
+                mu_strategy4_p: "By staying the course, you position yourself to capture the full long-term returns of the market.",
+                mu_footer1: "Data Sources: Baker, Bloom & Davis; Sensex Historical Data; Bajaj Finserv Asset Management Limited.",
+                mu_footer2: "This infographic is for illustrative purposes only and does not constitute financial advice."
+            },
+            mr: {
+                pageTitle: "आर्थिक इन्फोग्राफिक्स डॅशबोर्ड",
+                tabMutualFundsExplained: "म्युच्युअल फंड्सचे स्पष्टीकरण",
+                tabRaceToWealth: "संपत्तीची शर्यत",
+                tabFdVsDebt: "एफडी विरुद्ध डेट फंड",
+                tabTheMagic: "चक्रवाढीची जादू",
+                tabMarketUncertainty: "बाजारातील अनिश्चितता",
+                mfe_title: "म्युच्युअल फंड्सचे स्पष्टीकरण",
+                mfe_subtitle: "सामूहिक गुंतवणुकीद्वारे तुमचे पैसे तुमच्यासाठी कसे काम करतात हे समजून घेण्यासाठी तुमचे सोपे मार्गदर्शक.",
+                mfe_what_is_idea: "मूळ कल्पना काय आहे?",
+                mfe_what_is_idea_p: "स्वतः गुंतवणूक करणे कठीण असू शकते. अनेक वेगवेगळ्या कंपन्यांमध्ये शेअर्स खरेदी करण्यासाठी खूप पैशांची आवश्यकता असते. म्युच्युअल फंड अनेक लोकांकडून पैसे गोळा करून मोठ्या प्रमाणावर गुंतवणूक करून ही समस्या सोडवतो. याला आर्थिक सांघिक कार्य समजा.",
+                mfe_process_nutshell: "थोडक्यात प्रक्रिया",
+                mfe_investors: "गुंतवणूकदार",
+                mfe_pooled_money: "एकत्रित पैसे",
+                mfe_stocks_bonds: "स्टॉक्स आणि बॉण्ड्स",
+                mfe_diversification_p: "म्युच्युअल फंड एकाच स्टॉकमध्ये गुंतवणूक करण्याच्या तुलनेत तुमची गुंतवणूक अनेक मालमत्तांमध्ये त्वरित विभागून धोका कमी करतो.",
+                mfe_key_advantages: "मुख्य फायदे: हा एक स्मार्ट पर्याय का आहे",
+                mfe_adv_diversification: "झटपट विविधीकरण",
+                mfe_adv_diversification_p: "तुमची सर्व अंडी एकाच टोपलीत ठेवू नका. तुमचे पैसे अनेक गुंतवणुकींमध्ये विभागले जातात, ज्यामुळे धोका कमी होतो.",
+                mfe_adv_management: "व्यावसायिक व्यवस्थापन",
+                mfe_adv_management_p: "पूर्ण-वेळ तज्ञ तुमच्यासाठी पोर्टफोलिओचे संशोधन आणि व्यवस्थापन करतात. बाजार तज्ञ असण्याची गरज नाही.",
+                mfe_adv_affordability: "परवडण्याजोगे",
+                mfe_adv_affordability_p: "सिस्टिमॅटिक इन्व्हेस्टमेंट प्लॅन (SIP) द्वारे फक्त ₹500 पासून गुंतवणूक सुरू करा.",
+                mfe_adv_liquidity: "उच्च तरलता",
+                mfe_adv_liquidity_p: "चालू बाजार मूल्यावर (NAV) कोणत्याही व्यावसायिक दिवशी तुमचे फंड युनिट्स सहज खरेदी किंवा विक्री करा.",
+                mfe_portfolio_compare: "पोर्टफोलिओमध्ये काय आहे? फंडांच्या प्रकारांची तुलना",
+                mfe_risk_return: "धोका विरुद्ध संभाव्य परतावा",
+                mfe_risk_return_p: "वेगवेगळ्या प्रकारचे फंड धोका आणि वाढीची वेगवेगळी पातळी देतात. इक्विटी फंड जास्त धोकादायक असतात पण जास्त संभाव्य परतावा देतात, तर डेट फंड अधिक सुरक्षित असतात.",
+                mfe_hybrid_funds: "हायब्रीड फंड: एक संतुलित दृष्टीकोन",
+                mfe_hybrid_funds_p: "हायब्रीड फंड धोका संतुलित करण्यासाठी स्टॉक्स (इक्विटी) आणि बॉण्ड्स (डेट) यांचे मिश्रण करतात. फंडाच्या उद्दिष्टानुसार मिश्रण बदलते.",
+                mfe_how_money_grows: "तुमचे पैसे कसे वाढतात",
+                mfe_nav_growth: "भांडवली मूल्यवृद्धी (NAV वाढ)",
+                mfe_nav_growth_p: "तुम्ही कमावण्याचा मुख्य मार्ग म्हणजे तुमच्या गुंतवणुकीच्या मूल्यात होणारी वाढ. नेट अॅसेट व्हॅल्यू (NAV) हे फंडाच्या एका युनिटची किंमत आहे. फंडाच्या गुंतवणुकीचे (स्टॉक्स, बॉण्ड्स) मूल्य वाढल्यामुळे, NAV वाढते. जेव्हा तुम्ही तुमचे युनिट्स जास्त किमतीला विकता तेव्हा तुम्हाला नफा होतो.",
+                mfe_nav_growth_illustrative: "वेळेनुसार NAV ची उदाहरणात्मक वाढ.",
+                mfe_fine_print: "महत्वाचे मुद्दे: काय जाणून घ्यावे",
+                mfe_expense_ratio: "खर्च गुणोत्तर (Expense Ratio)",
+                mfe_expense_ratio_p: "फंडाद्वारे व्यावसायिक व्यवस्थापन आणि कामकाजाचा खर्च भागवण्यासाठी आकारले जाणारे एक लहान वार्षिक शुल्क (सामान्यतः 1-2%). हे तुमच्या गुंतवणुकीच्या मूल्यामधून आपोआप कापले जाते.",
+                mfe_market_risk: "बाजार धोका",
+                mfe_market_risk_p: "लक्षात ठेवा, परताव्याची हमी नाही. तुमच्या गुंतवणुकीचे मूल्य (NAV) बाजाराच्या कामगिरीनुसार बदलेल. दीर्घकालीन गुंतवणूक केल्याने या चढ-उतारांवर मात करण्यास मदत होते.",
+                mfe_exit_load: "एक्झिट लोड",
+                mfe_exit_load_p: "काही फंड तुम्ही तुमचे युनिट्स कमी कालावधीत (उदा. एक वर्ष) विकल्यास शुल्क आकारतात. हे अल्पकालीन सट्टेबाजीऐवजी दीर्घकालीन गुंतवणुकीला प्रोत्साहन देण्यासाठी आहे.",
+                mfe_footer: "ही इन्फोग्राफिक केवळ शैक्षणिक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही. सर्व डेटा उदाहरणात्मक आहे.",
+                rtw_title: "३० वर्षांची संपत्तीची शर्यत",
+                rtw_subtitle: "₹५०,००० वार्षिक गुंतवणुकीने तुम्हाला तीन दशकांत (आर्थिक वर्ष १९९६ - आर्थिक वर्ष २०२५) कुठे नेले असते याचे विश्लेषण.",
+                rtw_final_tally: "अंतिम गणना: तुमचे पैसे कुठे वाढले असते",
+                rtw_nifty_label: "निफ्टी-५०० (इक्विटी)",
+                rtw_nifty_sub: "सर्वाधिक वाढ",
+                rtw_gold_label: "सोने",
+                rtw_gold_sub: "सर्वोत्तम कामगिरी करणारी कमोडिटी",
+                rtw_ppf_sub: "स्थिर आणि सुरक्षित",
+                rtw_silver_sub: "सर्वाधिक अस्थिर",
+                rtw_cagr_title: "दीर्घकालीन वाढीचे इंजिन: CAGR",
+                rtw_cagr_p: "चक्रवाढ वार्षिक वाढ दर (CAGR) वेळेनुसार गुंतवणुकीचा खरा सरासरी परतावा दर्शवतो. इक्विटीने इतर मालमत्ता वर्गांना मागे टाकले आहे, ज्यामुळे संपत्ती निर्मितीसाठी त्यांची शक्ती दिसून येते.",
+                rtw_annual_returns_title: "अस्थिर प्रवास: वार्षिक परतावा",
+                rtw_annual_returns_p: "हा चार्ट महागाईच्या स्थिर वाढीच्या तुलनेत प्रमुख मालमत्ता वर्गांच्या अशांत प्रवासाचे चित्रण करतो. इक्विटी (निफ्टी-५००) तीव्र चढ-उतार दर्शवत असले तरी, त्यांचा दीर्घकालीन कल जोरदारपणे वरच्या दिशेने आहे. जेव्हा इक्विटी कमी होते, तेव्हा सोने अनेकदा वाढते, ज्यामुळे एक हेज म्हणून त्याची भूमिका दिसून येते.",
+                rtw_risk_reward_title: "धोका विरुद्ध परतावा: दुधारी तलवार",
+                rtw_risk_reward_p: "उच्च परतावा अनेकदा उच्च धोक्यांसह येतो. हा चार्ट दाखवतो की प्रत्येक मालमत्ता किती वेळा वर्षातील सर्वोत्तम कामगिरी करणारी होती विरुद्ध सर्वात वाईट. चांदीचे प्रोफाइल धक्कादायक आहे—एक वारंवार विजेता, पण सर्वात वारंवार पराभूत होणारी, जी अत्यंत अस्थिरता दर्शवते.",
+                rtw_lessons_title: "३० वर्षांतील गुंतवणुकीचे महत्त्वाचे धडे",
+                rtw_lesson1_h: "📈 धोका परतावा ठरवतो",
+                rtw_lesson1_p: "सर्वाधिक दीर्घकालीन संपत्ती इक्विटीमध्ये तयार झाली, ज्यात सर्वात लक्षणीय अल्प-मुदतीची घट झाली. उच्च वाढीसाठी अस्थिरता स्वीकारणे आवश्यक आहे.",
+                rtw_lesson2_h: "⏳ वेळ तुमचा मित्र आहे",
+                rtw_lesson2_p: "३० वर्षांहून अधिक काळात, उच्च-वाढीच्या मालमत्तेतील चक्रवाढीची शक्ती अल्प-मुदतीच्या बाजारातील गोंगाट शांत करते. बाजाराला वेळ देण्यापेक्षा गुंतून राहणे अधिक महत्त्वाचे आहे.",
+                rtw_lesson3_h: "🛡️ विविधीकरण महत्त्वाचे आहे",
+                rtw_lesson3_p: "कोणतीही एक मालमत्ता दरवर्षी जिंकत नाही. जेव्हा इक्विटी घसरली, तेव्हा सोने अनेकदा वाढले. एक वैविध्यपूर्ण पोर्टफोलिओ कोणत्याही एका मालमत्ता वर्गातील घसरणीपासून संरक्षण देऊ शकतो.",
+                rtw_lesson4_h: "💰 जिंकण्यासाठी महागाईवर मात करा",
+                rtw_lesson4_p: "तुमची संपत्ती खऱ्या अर्थाने वाढवण्यासाठी, तुमच्या गुंतवणुकीने सातत्याने महागाईपेक्षा (सरासरी ६.३%) जास्त कमाई करणे आवश्यक आहे. इक्विटी आणि सोन्याने हे साध्य केले आहे, तर निश्चित उत्पन्नाला अनेकदा असे करण्यात अडचण आली आहे.",
+                rtw_datatable_title: "तपशीलवार वर्ष-दर-वर्ष कामगिरी डेटा",
+                rtw_datatable_p: "खालील तक्ता या पृष्ठावरील विश्लेषण आणि व्हिज्युअलायझेशनसाठी वापरलेला कच्चा वार्षिक परतावा डेटा प्रदान करतो.",
+                rtw_footer1: "डेटा स्रोत: अंतर्गत संशोधन आणि विश्लेषण - जिओजित इनसाइट्स. FY % बदल: मार्च सरासरी / दरांवर. एफडी: मागील वर्ष, महागाई: FY '25, फेब्रुवारी. सर्व मूल्ये कर आणि व्यवहार खर्च वगळून, जर असतील तर. दरवर्षी ₹५०,००० ची गुंतवणूक (३० वर्षांसाठी, FY '96 पासून). गुंतवलेली रक्कम: ₹१५ लाख.",
+                rtw_footer2: "ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही. भूतकाळातील कामगिरी भविष्यात पुन्हा होईलच असे नाही.",
+                fdd_title: "मुदत ठेव (FD) विरुद्ध डेट फंड",
+                fdd_subtitle: "तुमच्या बचतीसाठी योग्य मार्ग निवडणे: अंदाजित सुरक्षा की बाजाराशी निगडीत वाढ?",
+                fdd_what_is_fd: "मुदत ठेव (FD) म्हणजे काय? 🛡️",
+                fdd_what_is_fd_p: "एफडी ही एक सरळ गुंतवणूक आहे जिथे तुम्ही बँकेला एका निश्चित कालावधीसाठी पूर्व-संमत व्याजदराने पैसे देता. ज्या गुंतवणूकदारांचे मुख्य प्राधान्य त्यांचे भांडवल सुरक्षित ठेवणे आहे, त्यांच्यासाठी हा एक उत्तम पर्याय आहे.",
+                fdd_fd_insurance: "DICGC द्वारे प्रति ठेवीदार, प्रति बँक विमा संरक्षण.",
+                fdd_what_is_debt: "डेट म्युच्युअल फंड म्हणजे काय? 📈",
+                fdd_what_is_debt_p: "डेट फंड अनेक गुंतवणूकदारांकडून पैसे गोळा करून सरकारी बॉण्ड्स आणि कॉर्पोरेट डेट सारख्या निश्चित-उत्पन्न सिक्युरिटीजच्या वैविध्यपूर्ण पोर्टफोलिओमध्ये गुंतवणूक करतो. परतावा बाजाराच्या कामगिरीशी निगडीत असतो, ज्यामुळे उच्च वाढीची क्षमता मिळते.",
+                fdd_debt_diversified: "वैविध्यपूर्ण",
+                fdd_debt_managed: "व्यावसायिक फंड व्यवस्थापकाद्वारे व्यवस्थापित पोर्टफोलिओ.",
+                fdd_risk_return_title: "धोका विरुद्ध संभाव्य परतावा: एक दृश्य तुलना",
+                fdd_risk_return_p: "हा चार्ट एफडीच्या सामान्य वार्षिक परताव्याच्या श्रेणीची विविध प्रकारच्या डेट फंडांशी तुलना करतो. एफडी निश्चित, अंदाजित परतावा देत असताना, डेट फंड धोका आणि परताव्याचे एक विस्तृत स्पेक्ट्रम प्रदान करतात. डेट फंडांमधील उच्च संभाव्य परतावा उच्च बाजाराशी निगडीत धोक्यांसह येतो.",
+                fdd_core_risks_title: "मुख्य धोके समजून घेणे",
+                fdd_credit_risk_title: "डेट फंड: क्रेडिट धोका",
+                fdd_credit_risk_p: "क्रेडिट धोका म्हणजे बॉण्ड जारीकर्ता पेमेंटमध्ये डिफॉल्ट होण्याची शक्यता. फंड व्यवस्थापक वेगवेगळ्या क्रेडिट रेटिंग असलेल्या सिक्युरिटीजमध्ये वैविध्य आणून हे कमी करतात. 'AAA' रेट केलेल्या बॉण्ड्समध्ये जास्त वाटप अधिक पुराणमतवादी, कमी-धोक्याचा पोर्टफोलिओ दर्शवते.",
+                fdd_interest_risk_title: "डेट फंड: व्याजदर धोका",
+                fdd_interest_risk_p: "व्याजदर आणि बॉण्डच्या किमती विरुद्ध दिशांना जातात. जेव्हा आरबीआय दर वाढवते, तेव्हा विद्यमान बॉण्ड्सची किंमत (आणि त्यामुळे फंडाची एनएव्ही) कमी होते. हा चार्ट व्यस्त संबंध दर्शवतो, जो डेट फंड गुंतवणूकदारांसाठी एक महत्त्वाचा धोका आहे.",
+                fdd_taxation_title: "कर आकारणीची लढाई (एप्रिल २०२३ नंतर)",
+                fdd_taxation_p: "कर कायद्यांमधील एका महत्त्वपूर्ण बदलाने एफडी आणि डेट फंडांमधील स्पर्धा समान पातळीवर आणली आहे. १ एप्रिल २०२३ नंतर केलेल्या गुंतवणुकीसाठी, नफ्यावरील कर आकारणी आता समान आहे, ज्यामुळे डेट फंडांना मिळणारा पूर्वीचा दीर्घकालीन कर फायदा काढून टाकला गेला आहे.",
+                fdd_fd_interest: "एफडी व्याज",
+                fdd_added_income: "तुमच्या एकूण उत्पन्नात जोडले जाते",
+                fdd_taxed_slab: "तुमच्या स्लॅब दराने कर आकारला जातो",
+                fdd_debt_gains: "डेट फंड नफा",
+                fdd_added_income_2: "तुमच्या एकूण उत्पन्नात जोडले जाते",
+                fdd_taxed_slab_2: "तुमच्या स्लॅब दराने कर आकारला जातो",
+                fdd_liquidity_title: "तरलता: तुमचे पैसे मिळवणे",
+                fdd_liquidity_fd: "मुदत ठेव (Fixed Deposit)",
+                fdd_liquidity_fd_p: "तुम्ही लवकर पैसे काढू शकता, परंतु बँका दंड आकारतात (सामान्यतः ०.५% ते १.०%), ज्यामुळे तुमची कमाई कमी होते. कर-बचत एफडी ५ वर्षांसाठी लॉक असतात.",
+                fdd_liquidity_debt: "डेट म्युच्युअल फंड",
+                fdd_liquidity_debt_p: "अत्यंत तरल. तुम्ही कोणत्याही व्यावसायिक दिवशी पैसे काढू शकता. काही फंडांमध्ये लहान एक्झिट लोड कालावधी असू शकतो, परंतु अनेकांमध्ये (लिक्विड फंडांसारखे) नसतो.",
+                fdd_swp_title: "ज्येष्ठ नागरिकांवर लक्ष केंद्रित: SWP चा फायदा",
+                fdd_swp_p: "निवृत्तांसाठी, डेट फंडांमधील सिस्टिमॅटिक विथड्रॉवल प्लॅन (SWP) नियमित, पेन्शनसारखा उत्पन्न प्रवाह तयार करण्याचा एक शक्तिशाली मार्ग प्रदान करतो. हे एफडीच्या निश्चित व्याज पेमेंटपेक्षा अधिक लवचिकता प्रदान करते आणि तुमच्या गरजेनुसार सानुकूलित केले जाऊ शकते.",
+                fdd_swp_lumpsum: "तुमचा एकरकमी<br>निवृत्ती निधी",
+                fdd_swp_invested: "कमी-धोक्याच्या डेट फंडात<br>गुंतवणूक",
+                fdd_swp_payout: "निश्चित मासिक<br>पेआउट (SWP)",
+                fdd_swp_calc_title: "SWP कॅल्क्युलेटर: तुम्ही किती पैसे काढू शकता?",
+                fdd_swp_calc_p: "हे कॅल्क्युलेशन दाखवते की <strong>₹१ कोटी</strong> चा निधी किती मासिक उत्पन्न निर्माण करू शकतो, असे गृहीत धरून की महागाईचा सामना करण्यासाठी काढण्याची रक्कम दरवर्षी <strong>६%</strong> ने वाढवली जाते. आम्ही दरमहा <strong>₹५०,०००</strong> च्या सुरुवातीच्या काढण्याने सुरुवात करू (वार्षिक ६% दर).",
+                fdd_swp_scenario1_h: "परिस्थिती १: पुराणमतवादी वाढ (७% परतावा)",
+                fdd_swp_scenario1_p: "काढण्याच्या स्टेप-अप दरापेक्षा किंचित जास्त परताव्यासह, निधी कालांतराने कमी होतो.",
+                fdd_swp_scenario2_h: "परिस्थिती २: मध्यम वाढ (१०% परतावा)",
+                fdd_swp_scenario2_p: "स्टेप-अप दरापेक्षा लक्षणीयरीत्या जास्त परताव्यासह, पैसे काढल्यानंतरही निधी वाढतच राहतो.",
+                fdd_swp_corpus_chart_title: "कालांतराने निधीचे मूल्य",
+                fdd_swp_year_label: "वर्ष",
+                fdd_verdict_title: "अंतिम निर्णय: तुमच्यासाठी कोणते योग्य आहे?",
+                fdd_verdict_fd_h: "मुदत ठेव (FD) निवडा जर...",
+                fdd_verdict_fd_ul: "<li>तुमचे #१ प्राधान्य भांडवल सुरक्षा आहे.</li><li>तुम्हाला १००% अंदाजित, हमी परतावा हवा आहे.</li><li>तुम्ही एक सोपी, हाताळणी नसलेली गुंतवणूक पसंत करता.</li><li>तुम्ही अत्यंत धोका-विन्मुख आहात.</li>",
+                fdd_verdict_debt_h: "डेट फंड निवडा जर...",
+                fdd_verdict_debt_ul: "<li>तुम्ही संभाव्यतः उच्च, बाजाराशी निगडीत परतावा शोधत आहात.</li><li>तुम्ही मध्यम धोके समजून घेता आणि स्वीकारता.</li><li>तुम्हाला उच्च तरलता आणि लवचिकता हवी आहे.</li><li>तुम्हाला SWP द्वारे नियमित उत्पन्न मिळवायचे आहे.</li>",
+                fdd_did_you_know: "तुम्हाला माहित आहे का?",
+                fdd_did_you_know_p: "बचत खात्यात <span class=\"font-extrabold text-custom-peach\">₹१ लाख</span> ठेवल्यास <span class=\"font-extrabold text-white underline decoration-custom-peach\">लिक्विड फंडांमधून</span> संभाव्य कमाई म्हणून दररोज <span class=\"font-extrabold text-custom-peach\">₹१०</span> चे नुकसान होते.",
+                fdd_footer: "अस्वीकरण: ही इन्फोग्राफिक केवळ शैक्षणिक हेतूंसाठी आहे. म्युच्युअल फंड गुंतवणूक बाजाराच्या जोखमीच्या अधीन आहे. कृपया कोणतीही गुंतवणूक करण्यापूर्वी आर्थिक सल्लागाराचा सल्ला घ्या.",
+                magic_title: "दीर्घकालीन गुंतवणुकीची जादू",
+                magic_subtitle: "चक्रवाढीच्या शक्तीद्वारे एक लहान, सातत्यपूर्ण गुंतवणूक २५ वर्षांत कशी मोठी संपत्ती बनू शकते ते शोधा.",
+                magic_kpi1: "मासिक गुंतवणूक",
+                magic_kpi2: "वर्षांचा संयम",
+                magic_kpi3: "अंतिम निधी",
+                magic_kpi_p: "ही इन्फोग्राफिक डेटाचे विश्लेषण करते ज्यात एका टॉप-परफॉर्मिंग फंडात ₹५,००० ची मासिक सिस्टिमॅटिक इन्व्हेस्टमेंट प्लॅन (SIP) जवळपास ₹५ कोटींमध्ये बदलते, जे २२.७% चा उल्लेखनीय वार्षिक परतावा दर्शवते.",
+                magic_fund_compare_title: "फंड कामगिरीची तुलना",
+                magic_fund_compare_p: "अनेक फंडांनी चांगली कामगिरी केली असली तरी, काहींनी इतरांना मागे टाकले. खालील चार्ट विविध फंडांना २५ वर्षांनंतर त्यांच्या अंतिम निधीनुसार रँक करतो, ज्यामुळे परताव्यातील फरक स्पष्टपणे दिसून येतो. तुलनेसाठी निफ्टी ५० बेंचमार्क समाविष्ट आहे.",
+                magic_category_compare_title: "तुमचा मार्ग निवडणे: श्रेणीनुसार SIP कामगिरी",
+                magic_category_compare_p: "वेगवेगळ्या फंड श्रेणी धोका आणि परताव्याचे वेगवेगळे स्तर देतात. ऐतिहासिकदृष्ट्या, स्मॉल-कॅप फंडांनी सर्वाधिक परतावा दिला आहे, परंतु त्यांच्यात सर्वाधिक अस्थिरता देखील आहे. यामुळे ते दीर्घकालीन दृष्टीकोन असलेल्या अनुभवी गुंतवणूकदारांसाठी योग्य ठरतात, तर नवीन गुंतवणूकदार लार्ज-कॅप फंडांच्या स्थिरतेला प्राधान्य देऊ शकतात.",
+                magic_cat1_h: "स्मॉल कॅप (१७.६%)",
+                magic_cat1_p: "यासाठी सर्वोत्तम: पूरक, उच्च-धोका, दीर्घ-मुदती (७+ वर्षे), फक्त लहान वाटप.",
+                magic_cat2_h: "मिड कॅप (१६.१%)",
+                magic_cat2_p: "यासाठी सर्वोत्तम: पूरक; उच्च धोका-परतावा, ७+ वर्षे, उच्च अस्थिरता सहनशीलता.",
+                magic_cat3_h: "व्हॅल्यू ओरिएंटेड (१५.५%)",
+                magic_cat3_p: "यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; मूल्य शैली, लवचिक वाटप, किमान ५ वर्षे.",
+                magic_cat4_h: "फ्लेक्सी कॅप (१४.७%)",
+                magic_cat4_p: "यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; कॅप्स/क्षेत्रांमध्ये लवचिक, किमान ५ वर्षे.",
+                magic_cat5_h: "लार्ज आणि मिड कॅप (१३.७%)",
+                magic_cat5_p: "यासाठी सर्वोत्तम: मुख्य पोर्टफोलिओ; वैविध्यपूर्ण मार्केट-कॅप एक्सपोजर, किमान ५ वर्षे.",
+                magic_cat6_h: "लार्ज कॅप (१२.२%)",
+                magic_cat6_p: "यासाठी सर्वोत्तम: नवीन गुंतवणूकदार, कमी अस्थिरता सहनशीलता, किमान ५-वर्षांचा कालावधी.",
+                magic_anatomy_title: "वाढीचे विश्लेषण",
+                magic_anatomy_p: "टॉप-परफॉर्मिंग निप्पॉन इंडिया ग्रोथ फंडावर लक्ष केंद्रित करून, हा चार्ट चक्रवाढीच्या घातांकीय शक्तीचे चित्रण करतो. ₹०.१५ कोटींची एकूण गुंतवलेली रक्कम २५ वर्षांत निर्माण झालेल्या प्रचंड वाढीपुढे लहान दिसते.",
+                magic_rules_title: "संपत्ती निर्मितीसाठी सुवर्ण नियम",
+                magic_rule1_h: "लवकर सुरुवात करा",
+                magic_rule1_p: "तुमचे पैसे जितके जास्त वेळ तुमच्यासाठी काम करतील, तितका चक्रवाढीचा प्रभाव जास्त असेल.",
+                magic_rule2_h: "सातत्य ठेवा",
+                magic_rule2_p: "एक शिस्तबद्ध मासिक एसआयपी ऊन-पावसात स्थिरपणे संपत्ती निर्माण करते.",
+                magic_rule3_h: "गुंतवणूक कायम ठेवा",
+                magic_rule3_p: "अल्पकालीन गोंगाट आणि बाजारातील घसरणीकडे दुर्लक्ष करा. संयमाला फळ मिळते.",
+                magic_rule4_h: "तुमची एसआयपी वाढवा",
+                magic_rule4_p: "तुमच्या संपत्तीच्या प्रवासाला गती देण्यासाठी तुमची गुंतवणूक वार्षिक वाढवा.",
+                magic_stepup_title: "नियमित विरुद्ध स्टेप-अप एसआयपी: प्रवेगक प्रभाव",
+                magic_stepup_p: "तुमची एसआयपी रक्कम दरवर्षी फक्त १०% ने वाढवणे (\"स्टेप-अप एसआयपी\") तुमच्या अंतिम संपत्तीवर प्रचंड परिणाम करू शकते. जास्त गुंतवणूक करताना, अंतिम निधी непропорционально मोठा वाढतो, ₹५ कोटींवरून संभाव्य ₹८ कोटींपर्यंत.",
+                magic_drawdown_title: "अस्थिरतेला सामोरे जा: घसरणीला घाबरू नका",
+                magic_drawdown_p: "संपत्तीचा मार्ग कधीही सरळ नसतो. हा चार्ट टॉप फंडाने अनुभवलेल्या लक्षणीय तात्पुरत्या घसरणी (ड्रॉडౌन्स) दर्शवतो. या काळात गुंतवणूक कायम ठेवणे महत्त्वाचे आहे, कारण ते तुम्हाला कमी किमतीत जास्त युनिट्स खरेदी करण्याची संधी देते, ज्यामुळे दीर्घकालीन परतावा वाढतो.",
+                magic_footer1: "डेटा स्रोत: ACEMF आणि व्हॅल्यू रिसर्च, बिझनेसलाइनमध्ये प्रकाशित झाल्याप्रमाणे. परतावा ३१ डिसेंबर, २०२४ पर्यंत.",
+                magic_footer2: "ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही.",
+                mu_title: "गुंतवणूक कायम ठेवण्याचे अढळ कारण",
+                mu_subtitle: "आर्थिक वादळांमध्ये शिस्त, वेळ साधणे नव्हे, हीच दीर्घकालीन वाढीची गुरुकिल्ली का आहे यावर एक संवादात्मक डेटा कथा.",
+                mu_drumbeat_title: "अनिश्चिततेचा सततचा नाद",
+                mu_drumbeat_p: "बातम्यांचे मथळे अनेकदा आर्थिक अनिश्चिततेला एक अद्वितीय, अभूतपूर्व संकट म्हणून चित्रित करतात. तथापि, आर्थिक धोरण अनिश्चितता निर्देशांकावर नजर टाकल्यास असे दिसून येते की अस्थिरता ही जागतिक परिदृश्याची एक आवर्ती वैशिष्ट्य आहे. मोठ्या घटनांमुळे सातत्याने वाढ होते, परंतु बाजाराने नेहमीच जुळवून घेतले आहे आणि पुढे वाटचाल केली आहे.",
+                mu_cost_fear_title: "भीतीची विनाशकारी किंमत",
+                mu_cost_fear_p: "जेव्हा अनिश्चितता वाढते, तेव्हा विकून सुरक्षिततेचा शोध घेणे ही नैसर्गिक प्रवृत्ती असते. 'बाजाराला वेळ देण्याचा' हा प्रयत्न अनेकदा विनाशकारी ठरतो, कारण बाजारातील सर्वोत्तम दिवस अनेकदा त्याच्या सर्वात वाईट दिवसांनंतर येतात. या काही महत्त्वाच्या पुनर्प्राप्ती दिवसांना चुकवल्यास दीर्घकालीन परतावा कमी होऊ शकतो, जसे की सेन्सेक्समध्ये ₹१ लाखाच्या गुंतवणुकीच्या १० वर्षांच्या वाढीवरून दिसून येते.",
+                mu_kpi1: "पूर्णपणे गुंतवलेले राहिल्यास १० वर्षांनंतरचे मूल्य.",
+                mu_kpi2: "फक्त २० सर्वोत्तम दिवस चुकवल्यानंतरचे मूल्य.",
+                mu_kpi3: "२० दिवस चुकवल्यामुळे परताव्यातील संभाव्य नुकसान.",
+                mu_resilience_title: "संकटात लवचिकता: मोठ्या घटनांनंतर बाजाराचा परतावा",
+                mu_resilience_p: "इतिहास दाखवतो की भू-राजकीय संकटाचे काळ, अस्वस्थ करणारे असले तरी, अनेकदा त्यानंतर बाजारात चांगली कामगिरी होते. खालील डेटा विविध मोठ्या घटनांपासून वार्षिक परतावा (CAGR) दर्शवतो. लक्षात घ्या की, सर्वत्र, बाजारांनी पुनर्प्राप्ती केली आहे आणि सकारात्मक परतावा दिला आहे, विशेषतः मिड आणि स्मॉल-कॅप विभागांमध्ये.",
+                mu_gap_title: "वर्तणुकीतील तफावत: आपण चुका का करतो",
+                mu_gap_p: "गुंतवणूकदाराची सुरळीत, रेषीय वाढीची अपेक्षा आणि अस्थिर बाजाराचे वास्तव यांच्यातील तफावत चुकीच्या निर्णयांना कारणीभूत ठरते. आपण उत्साहाच्या भरात जास्त किमतीला खरेदी करतो आणि दहशतीच्या भरात कमी किमतीला विकतो. वॉरन बफे यांनी उत्तम म्हटले आहे: \"तुम्ही काय करत आहात हे माहित नसल्यामुळे धोका निर्माण होतो.\" ही तफावत समजून घेणे हे त्यावर मात करण्याचे पहिले पाऊल आहे.",
+                mu_strategy_title: "विजयी धोरण: एक शिस्तबद्ध मार्ग",
+                mu_strategy1_h: "अनिश्चितता स्वीकारा",
+                mu_strategy1_p: "अस्थिरता हा गुंतवणुकीचा एक सामान्य भाग आहे हे स्वीकारा, तुमची रणनीती सोडून देण्याचे चिन्ह नाही.",
+                mu_strategy2_h: "बाजाराला वेळ देण्याचा मोह टाळा",
+                mu_strategy2_p: "डेटा सिद्ध करतो की उच्च आणि नीच पातळीचा अंदाज लावण्याचा प्रयत्न करणे हा एक हरणारा खेळ आहे. तो खेळू नका.",
+                mu_strategy3_h: "शिस्तबद्ध रहा",
+                mu_strategy3_p: "सर्वात शक्तिशाली साधन म्हणजे संयम. वेळ आणि चक्रवाढीला तुमच्यासाठी काम करू द्या.",
+                mu_strategy4_h: "वाढ साध्य करा",
+                mu_strategy4_p: "मार्गावर टिकून राहून, तुम्ही बाजाराचा पूर्ण दीर्घकालीन परतावा मिळवण्यासाठी स्वतःला योग्य स्थितीत ठेवता.",
+                mu_footer1: "डेटा स्रोत: बेकर, ब्लूम आणि डेव्हिस; सेन्सेक्स ऐतिहासिक डेटा; बजाज फिनसर्व्ह अॅसेट मॅनेजमेंट लिमिटेड.",
+                mu_footer2: "ही इन्फोग्राफिक केवळ उदाहरणात्मक हेतूंसाठी आहे आणि ती आर्थिक सल्ला नाही."
+            }
+        };
+
+
+        // --- CHART DATA (Remains mostly the same, labels will be picked from translations) ---
+        const financialData = {
+            labels: ['FY 96', 'FY 97', 'FY 98', 'FY 99', 'FY 00', 'FY 01', 'FY 02', 'FY 03', 'FY 04', 'FY 05', 'FY 06', 'FY 07', 'FY 08', 'FY 09', 'FY 10', 'FY 11', 'FY 12', 'FY 13', 'FY 14', 'FY 15', 'FY 16', 'FY 17', 'FY 18', 'FY 19', 'FY 20', 'FY 21', 'FY 22', 'FY 23', 'FY 24', 'FY 25'],
+            ppf: [12.0, 12.0, 12.0, 12.0, 11.0, 9.5, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.6, 8.8, 8.7, 8.7, 8.7, 8.0, 7.6, 8.0, 7.9, 7.1, 7.1, 7.1, 7.1, 7.1],
+            fd: [11.0, 12.0, 11.5, 11.3, 10.3, 9.5, 9.3, 8.0, 5.8, 5.3, 5.8, 6.5, 8.3, 8.6, 8.3, 6.8, 8.6, 8.9, 8.3, 8.6, 8.4, 7.5, 6.8, 6.5, 6.9, 6.2, 5.2, 5.3, 6.6, 6.9],
+            gold: [11.6, -7.9, -16.6, 8.4, 4.9, -6.0, 15.3, 10.4, 10.2, 4.6, 28.7, 16.3, 34.8, 20.6, 9.1, 25.4, 33.7, 6.0, 1.1, -12.3, 10.0, -0.1, 5.8, 5.3, 32.0, 5.6, 15.9, 11.1, 13.4, 33.2],
+            silver: [20.7, -0.7, -15.6, -8.8, 2.3, -8.0, 6.0, -0.1, 42.7, -2.8, 35.6, 32.9, 24.9, -8.9, 22.0, 101.2, 5.7, -4.5, -16.4, -19.1, 0.9, 12.3, -9.0, -0.8, 8.8, 59.4, 3.5, -2.6, 9.9, 33.9],
+            sensex: [-2.3, 13.1, 3.2, -1.4, 46.4, -26.8, -3.4, -10.1, 82.2, 21.6, 65.3, 20.2, 24.5, -42.4, 94.7, 8.2, -4.3, 11.8, 15.8, 32.9, -11.8, 19.7, 15.3, 14.4, -13.3, 57.2, 13.7, 5.1, 26.7, 4.2],
+            nifty500: [-16.2, 3.0, 1.4, 8.9, 94.9, -42.2, -0.4, -4.6, 105.7, 29.0, 55.7, 11.9, 27.7, -44.1, 102.7, 4.1, -3.4, 8.7, 12.6, 42.4, -10.5, 26.3, 16.4, 5.8, -16.8, 62.2, 17.1, 1.8, 39.9, 4.0],
+            inflation: [8.9, 10.0, 8.3, 8.9, 4.8, 2.5, 5.2, 4.1, 3.5, 4.2, 4.8, 6.7, 7.9, 8.0, 14.9, 8.8, 8.6, 11.4, 6.7, 6.3, 5.5, 2.6, 4.4, 7.7, 5.5, 5.7, 5.4, 5.8, 4.2, 2.6]
+        };
+        const cagrData = { values: [14.7, 13.7, 12.0, 10.1, 8.2, 7.4] };
+        const riskProfileData = { best: [0, 1, 8, 5, 5, 10], worst: [2, 0, 4, 10, 4, 6] };
+        
+        let currentLanguage = 'en';
+        let charts = {};
+
+        // --- GLOBAL HELPER FUNCTIONS ---
+        function wrapLabel(str, maxWidth) {
+            if (!str || str.length <= maxWidth) { return str; }
+            const words = str.split(' '); let lines = []; let currentLine = '';
+            for (const word of words) { if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) { lines.push(currentLine); currentLine = word; } else { currentLine = (currentLine + ' ' + word).trim(); } }
+            if (currentLine.length > 0) { lines.push(currentLine); }
+            return lines;
+        }
+
+        // --- LANGUAGE TOGGLE FUNCTION ---
+        const translatePage = (lang) => {
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                switchTab(activeTab.id, false);
+            }
+        };
+
+        // --- CHART RENDERING FUNCTIONS (MODIFIED FOR TRANSLATION) ---
+        const renderCagrChart = () => {
+            if (charts.cagrChart) charts.cagrChart.destroy();
+            const ctx = document.getElementById('cagrChart')?.getContext('2d');
+            if (!ctx) return;
+            const labels = {
+                en: ['Nifty-500', 'Sensex', 'Gold', 'Silver', 'PPF', 'FD'],
+                mr: ['निफ्टी-५००', 'सेन्सेक्स', 'सोने', 'चांदी', 'पीपीएफ', 'एफडी']
+            };
+            const datasetLabel = { en: 'CAGR (%)', mr: 'CAGR (%)' };
+            charts.cagrChart = new Chart(ctx, { type: 'bar', data: { labels: labels[currentLanguage], datasets: [{ label: datasetLabel[currentLanguage], data: cagrData.values, backgroundColor: ['#0A2463', '#1e4a8e', '#F5D547', '#C0C0C0', '#3E8989', '#6fb0af'], borderColor: '#ffffff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'CAGR %' } } }, plugins: { legend: { display: false } } } });
+        };
+
+        const renderAnnualReturnsChart = () => {
+            if (charts.annualReturnsChart) charts.annualReturnsChart.destroy();
+            const ctx = document.getElementById('annualReturnsChart')?.getContext('2d');
+            if (!ctx) return;
+            const labels = {
+                en: ['Nifty-500', 'Gold', 'Silver', 'PPF', 'FD', 'Inflation'],
+                mr: ['निफ्टी-५००', 'सोने', 'चांदी', 'पीपीएफ', 'एफडी', 'महागाई']
+            };
+            const yAxisLabel = { en: 'Annual Return (%)', mr: 'वार्षिक परतावा (%)' };
+            charts.annualReturnsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: financialData.labels,
+                    datasets: [
+                        { label: labels[currentLanguage][0], data: financialData.nifty500, borderColor: '#0A2463', fill: false, tension: 0.1 },
+                        { label: labels[currentLanguage][1], data: financialData.gold, borderColor: '#F5D547', fill: false, tension: 0.1 },
+                        { label: labels[currentLanguage][2], data: financialData.silver, borderColor: '#A9A9A9', fill: false, tension: 0.1 },
+                        { label: labels[currentLanguage][3], data: financialData.ppf, borderColor: '#3E8989', fill: false, tension: 0.1 },
+                        { label: labels[currentLanguage][4], data: financialData.fd, borderColor: '#85C7F2', fill: false, tension: 0.1 },
+                        { label: labels[currentLanguage][5], data: financialData.inflation, borderColor: '#dc3545', fill: false, tension: 0.1, borderDash: [5, 5] }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: yAxisLabel[currentLanguage] } } }, plugins: { legend: { position: 'top' } } }
+            });
+        };
+        
+        const renderRiskProfileChart = () => {
+            if (charts.riskProfileChart) charts.riskProfileChart.destroy();
+            const ctx = document.getElementById('riskProfileChart')?.getContext('2d');
+            if (!ctx) return;
+            const labels = {
+                en: ['PPF', 'FD', 'Gold', 'Silver', 'Sensex', 'Nifty-500'],
+                mr: ['पीपीएफ', 'एफडी', 'सोने', 'चांदी', 'सेन्सेक्स', 'निफ्टी-५००']
+            };
+            const datasetLabels = {
+                en: ['# Years as Best Performer', '# Years as Worst Performer'],
+                mr: ['सर्वोत्तम कामगिरी करणारी वर्षे', 'सर्वात वाईट कामगिरी करणारी वर्षे']
+            };
+            const yAxisLabel = { en: 'Number of Years', mr: 'वर्षांची संख्या' };
+            charts.riskProfileChart = new Chart(ctx, { type: 'bar', data: { labels: labels[currentLanguage], datasets: [ { label: datasetLabels[currentLanguage][0], data: riskProfileData.best, backgroundColor: '#28a745', }, { label: datasetLabels[currentLanguage][1], data: riskProfileData.worst, backgroundColor: '#dc3545', } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: yAxisLabel[currentLanguage] }, ticks: { stepSize: 2 } } }, plugins: { legend: { position: 'top' } } } });
+        };
+
+        const populateDataTable = () => {
+            const headerRow = document.getElementById('rtw_datatable_header');
+            const tableBody = document.getElementById('dataTableBody');
+            if (!tableBody || !headerRow) return;
+            const headers = {
+                en: ['Year', 'PPF (%)', 'FD (%)', 'Gold (%)', 'Silver (%)', 'Sensex (%)', 'Nifty-500 (%)', 'Inflation (%)'],
+                mr: ['वर्ष', 'पीपीएफ (%)', 'एफडी (%)', 'सोने (%)', 'चांदी (%)', 'सेन्सेक्स (%)', 'निफ्टी-५०० (%)', 'महागाई (%)']
+            };
+            headerRow.innerHTML = headers[currentLanguage].map(h => `<th scope="col" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">${h}</th>`).join('');
+            
+            let tableHTML = '';
+            financialData.labels.forEach((year, index) => {
+                const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                tableHTML += `<tr class="${rowClass}"><td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${year}</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.ppf[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.fd[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.gold[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.silver[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.sensex[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.nifty500[index].toFixed(1)}%</td><td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${financialData.inflation[index].toFixed(1)}%</td></tr>`;
+            });
+            tableBody.innerHTML = tableHTML;
+        };
+
+        const calculateAndDisplaySWP = (containerId, returnRate) => {
+            const container = document.getElementById(containerId);
+            if (!container) return { corpusHistory: [], withdrawalHistory: [] };
+            let corpus = 10000000;
+            const stepUp = 0.06;
+            let annualWithdrawal = 600000;
+            const headers = { en: ['Year', 'Withdrawal', 'Corpus End'], mr: ['वर्ष', 'काढलेली रक्कम', 'अखेरचा निधी'] };
+            let tableHTML = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100"><tr><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">${headers[currentLanguage][0]}</th><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">${headers[currentLanguage][1]}</th><th class="px-2 py-2 text-left text-xs font-bold text-gray-600 uppercase">${headers[currentLanguage][2]}</th></tr></thead><tbody>`;
+            const corpusHistory = [];
+            const withdrawalHistory = [];
+            for (let year = 1; year <= 30; year++) {
+                if (corpus <= 0) corpus = 0;
+                if (year > 1) annualWithdrawal *= (1 + stepUp);
+                withdrawalHistory.push(annualWithdrawal);
+                const openingCorpus = corpus;
+                const returns = openingCorpus * returnRate;
+                corpus += returns;
+                corpus -= annualWithdrawal > corpus ? corpus : annualWithdrawal;
+                corpusHistory.push(corpus);
+                if (year <= 10) {
+                    const rowClass = year % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+                    tableHTML += `<tr class="${rowClass}"><td class="px-2 py-1.5 text-sm">${year}</td><td class="px-2 py-1.5 text-sm">₹${(annualWithdrawal / 100000).toFixed(2)}L</td><td class="px-2 py-1.5 text-sm">₹${(corpus / 100000).toFixed(2)}L</td></tr>`;
+                }
+            }
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+            return { corpusHistory, withdrawalHistory };
+        };
+
+        const renderSwpProjectionChart = () => {
+            if (charts.swpProjectionChart) charts.swpProjectionChart.destroy();
+            const ctx = document.getElementById('swpProjectionChart')?.getContext('2d');
+            if (!ctx) return;
+
+            const { corpusHistory: corpus7, withdrawalHistory } = calculateAndDisplaySWP('swp-table-7', 0.07);
+            const { corpusHistory: corpus10 } = calculateAndDisplaySWP('swp-table-10', 0.10);
+            const labels = Array.from({ length: 30 }, (_, i) => `${translations[currentLanguage].fdd_swp_year_label} ${i + 1}`);
+            const datasetLabels = {
+                en: ['Annual Withdrawal Amount', 'Corpus at 7% Return', 'Corpus at 10% Return'],
+                mr: ['वार्षिक काढलेली रक्कम', '७% परताव्यावर निधी', '१०% परताव्यावर निधी']
+            };
+            const axisLabels = {
+                en: { y: 'Corpus Value (in Crores)', y1: 'Annual Withdrawal (in Lakhs)', x: 'Years' },
+                mr: { y: 'निधीचे मूल्य (कोटींमध्ये)', y1: 'वार्षिक काढलेली रक्कम (लाखांमध्ये)', x: 'वर्षे' }
+            };
+            charts.swpProjectionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: datasetLabels[currentLanguage][0], data: withdrawalHistory, backgroundColor: 'rgba(255, 193, 7, 0.6)', yAxisID: 'y1', order: 2 },
+                        { label: datasetLabels[currentLanguage][1], data: corpus7, borderColor: '#F07167', backgroundColor: 'transparent', type: 'line', tension: 0.1, yAxisID: 'y' , order: 1},
+                        { label: datasetLabels[currentLanguage][2], data: corpus10, borderColor: '#00AFB9', backgroundColor: 'transparent', type: 'line', tension: 0.1, yAxisID: 'y', order: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: axisLabels[currentLanguage].y }, ticks: { callback: function(value) { return (value / 10000000).toFixed(2) + (currentLanguage === 'mr' ? ' कोटी' : ' Cr'); } } },
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: axisLabels[currentLanguage].y1 }, ticks: { callback: function(value) { return '₹' + (value / 100000).toFixed(1) + 'L'; } }, grid: { drawOnChartArea: false } },
+                        x: { title: { display: true, text: axisLabels[currentLanguage].x } }
+                    }
+                }
+            });
+        };
+
+        const renderFdDebtCharts = () => {
+            if (charts.returnComparisonChart) charts.returnComparisonChart.destroy();
+            if (charts.creditRiskChart) charts.creditRiskChart.destroy();
+            if (charts.interestRateRiskChart) charts.interestRateRiskChart.destroy();
+            
+            const returnComparisonCtx = document.getElementById('returnComparisonChart')?.getContext('2d');
+            if(returnComparisonCtx) {
+                const returnLabels = {
+                    en: ['Fixed Deposit', 'Liquid Fund', 'Short Duration Fund', 'Corporate Bond Fund', 'Gilt Fund'],
+                    mr: ['मुदत ठेव (FD)', 'लिक्विड फंड', 'शॉर्ट ड्यूरेशन फंड', 'कॉर्पोरेट बॉण्ड फंड', 'गिल्ट फंड']
+                };
+                charts.returnComparisonChart = new Chart(returnComparisonCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: returnLabels[currentLanguage],
+                        datasets: [{
+                            label: translations[currentLanguage].fdd_risk_return_title,
+                            data: [ [6.0, 7.5], [6.5, 7.5], [7.0, 8.0], [7.5, 8.5], [7.0, 9.0] ],
+                            backgroundColor: ['#F07167', '#FED9B7', '#00AFB9', '#0081A7', '#4a4e69'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, title: { display: true, text: {en: 'Potential Annual Return (%)', mr: 'संभाव्य वार्षिक परतावा (%)'}[currentLanguage] } } } }
+                });
+            }
+
+            const creditRiskCtx = document.getElementById('creditRiskChart')?.getContext('2d');
+            if(creditRiskCtx) {
+                const creditLabels = { en: ['AAA Rated', 'AA Rated', 'Sovereign (G-Sec)', 'A & Below'], mr: ['AAA रेटेड', 'AA रेटेड', 'सार्वभौम (G-Sec)', 'A आणि खाली']};
+                charts.creditRiskChart = new Chart(creditRiskCtx, { type: 'doughnut', data: { labels: creditLabels[currentLanguage], datasets: [{ label: {en: 'Portfolio Allocation', mr: 'पोर्टफोलिओ वाटप'}[currentLanguage], data: [65, 20, 10, 5], backgroundColor: ['#0081A7', '#00AFB9', '#FED9B7', '#F07167'], borderColor: '#ffffff', borderWidth: 4, }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            }
+            
+            const interestRateRiskCtx = document.getElementById('interestRateRiskChart')?.getContext('2d');
+            if(interestRateRiskCtx) {
+                const interestLabels = { en: ['RBI Interest Rate', 'Bond Price (NAV)'], mr: ['आरबीआय व्याज दर', 'बॉण्डची किंमत (NAV)'] };
+                charts.interestRateRiskChart = new Chart(interestRateRiskCtx, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], datasets: [ { label: interestLabels[currentLanguage][0], data: [6.5, 6.6, 6.75, 6.55, 6.8, 7.0], borderColor: '#F07167', fill: true, tension: 0.3 }, { label: interestLabels[currentLanguage][1], data: [100, 99.5, 98.8, 100.2, 98.6, 98], borderColor: '#0081A7', fill: true, tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            }
+            
+            renderSwpProjectionChart();
+        };
+
+        const renderTheMagicCharts = () => {
+            if (charts.fundPerformanceChart) charts.fundPerformanceChart.destroy();
+            if (charts.categoryPerformanceChart) charts.categoryPerformanceChart.destroy();
+            if (charts.sipGrowthChart) charts.sipGrowthChart.destroy();
+            if (charts.stepUpComparisonChart) charts.stepUpComparisonChart.destroy();
+            if (charts.drawdownChart) charts.drawdownChart.destroy();
+            
+            const fundPerformanceCtx = document.getElementById('fundPerformanceChart')?.getContext('2d');
+            if(fundPerformanceCtx) {
+                const fundData = {
+                    en: [ { name: 'Nippon India Growth', corpus: 4.98 }, { name: 'Franklin India Prima', corpus: 3.79 }, { name: 'SBI Contra', corpus: 3.45 }, { name: 'HDFC Flexi Cap', corpus: 3.20 }, { name: 'SBI Consumption Opp', corpus: 2.92 }, { name: 'SBI Long Term Equity', corpus: 2.86 }, { name: 'Tata Mid Cap Growth', corpus: 2.81 }, { name: 'Franklin India Flexi Cap', corpus: 2.68 }, { name: 'SBI Magnum Global', corpus: 2.60 }, { name: 'HDFC ELSS Tax Saver', corpus: 2.60 }, { name: 'NIFTY 50 - TRI', corpus: 1.30 }, ].sort((a, b) => b.corpus - a.corpus),
+                    mr: [ { name: 'निप्पॉन इंडिया ग्रोथ', corpus: 4.98 }, { name: 'फ्रँकलिन इंडिया प्रायमा', corpus: 3.79 }, { name: 'एसबीआय कॉन्ट्रा', corpus: 3.45 }, { name: 'एचडीएफसी फ्लेक्सी कॅप', corpus: 3.20 }, { name: 'एसबीआय कन्झम्प्शन संधी', corpus: 2.92 }, { name: 'एसबीआय लाँग टर्म इक्विटी', corpus: 2.86 }, { name: 'टाटा मिड कॅप ग्रोथ', corpus: 2.81 }, { name: 'फ्रँकलिन इंडिया फ्लेक्सी कॅप', corpus: 2.68 }, { name: 'एसबीआय मॅग्नम ग्लोबल', corpus: 2.60 }, { name: 'एचडीएफसी ईएलएसएस टॅक्स सेव्हर', corpus: 2.60 }, { name: 'निफ्टी ५० - टीआरआय', corpus: 1.30 }, ].sort((a, b) => b.corpus - a.corpus)
+                }[currentLanguage];
+                charts.fundPerformanceChart = new Chart(fundPerformanceCtx, {
+                    type: 'bar',
+                    data: { labels: fundData.map(f => wrapLabel(f.name, 16)), datasets: [{ label: {en: 'Corpus (in ₹ Crore)', mr: 'निधी (₹ कोटींमध्ये)'}[currentLanguage], data: fundData.map(f => f.corpus), backgroundColor: fundData.map(f => f.name.includes('NIFTY') || f.name.includes('निफ्टी') ? '#6b7280' : '#00A6FB'), borderWidth: 1 }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: {en: 'Final Corpus (in ₹ Crore)', mr: 'अंतिम निधी (₹ कोटींमध्ये)'}[currentLanguage] } } } }
+                });
+            }
+            
+            const categoryPerformanceCtx = document.getElementById('categoryPerformanceChart')?.getContext('2d');
+            if (categoryPerformanceCtx) {
+                const categoryData = {
+                    en: [ { category: 'Large Cap', return: 12.2, color: '#6b7280' }, { category: 'Large & Mid Cap', return: 13.7, color: '#006494' }, { category: 'Flexi Cap', return: 14.7, color: '#0582CA' }, { category: 'Value Oriented', return: 15.5, color: '#00A6FB' }, { category: 'Mid Cap', return: 16.1, color: '#FBAF00' }, { category: 'Small Cap', return: 17.6, color: '#FD5900' }, ].sort((a, b) => a.return - b.return),
+                    mr: [ { category: 'लार्ज कॅप', return: 12.2, color: '#6b7280' }, { category: 'लार्ज आणि मिड कॅप', return: 13.7, color: '#006494' }, { category: 'फ्लेक्सी कॅप', return: 14.7, color: '#0582CA' }, { category: 'व्हॅल्यू ओरिएंटेड', return: 15.5, color: '#00A6FB' }, { category: 'मिड कॅप', return: 16.1, color: '#FBAF00' }, { category: 'स्मॉल कॅप', return: 17.6, color: '#FD5900' }, ].sort((a, b) => a.return - b.return)
+                }[currentLanguage];
+                charts.categoryPerformanceChart = new Chart(categoryPerformanceCtx, {
+                    type: 'bar',
+                    data: { labels: categoryData.map(c => c.category), datasets: [{ label: {en: 'Avg 5Y SIP Return (%)', mr: 'सरासरी ५ वर्षांचा SIP परतावा (%)'}[currentLanguage], data: categoryData.map(c => c.return), backgroundColor: categoryData.map(c => c.color), borderWidth: 0 }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: {en: 'Avg 5Y SIP Return (%)', mr: 'सरासरी ५ वर्षांचा SIP परतावा (%)'}[currentLanguage] } } } }
+                });
+            }
+
+            const sipGrowthCtx = document.getElementById('sipGrowthChart')?.getContext('2d');
+            if(sipGrowthCtx) {
+                const years = Array.from({ length: 26 }, (_, i) => `Yr ${i}`);
+                const regularSipData = { investmentData: [], growthData: [] };
+                let runningInvestment = 0; let runningCorpus = 0; const annualInvestment = 0.6; const annualRate = 0.227;
+                for (let i = 0; i <= 25; i++) { regularSipData.investmentData.push(runningInvestment); const growth = runningCorpus - runningInvestment; regularSipData.growthData.push(growth > 0 ? growth : 0); if (i < 25) { runningCorpus = (runningCorpus + annualInvestment) * (1 + annualRate); runningInvestment += annualInvestment; } }
+                charts.sipGrowthChart = new Chart(sipGrowthCtx, {
+                    type: 'line',
+                    data: { labels: years, datasets: [{ label: {en: 'Total Investment (₹ Crores)', mr: 'एकूण गुंतवणूक (₹ कोटी)'}[currentLanguage], data: regularSipData.investmentData.map(v => (v / 100).toFixed(2)), backgroundColor: 'rgba(0, 100, 148, 0.2)', borderColor: '#006494', fill: true, tension: 0.4 }, { label: {en: 'Growth of Investment (₹ Crores)', mr: 'गुंतवणुकीची वाढ (₹ कोटी)'}[currentLanguage], data: regularSipData.growthData.map(v => (v / 100).toFixed(2)), backgroundColor: 'rgba(0, 166, 251, 0.2)', borderColor: '#00A6FB', fill: true, tension: 0.4 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { stacked: true, title: { display: true, text: {en: 'Value (in ₹ Crores)', mr: 'मूल्य (₹ कोटींमध्ये)'}[currentLanguage] } } } }
+                });
+            }
+
+            const stepUpComparisonCtx = document.getElementById('stepUpComparisonChart')?.getContext('2d');
+            if(stepUpComparisonCtx) {
+                 const years = Array.from({ length: 26 }, (_, i) => `Yr ${i}`);
+                 const annualRate = 0.227;
+                 const regularCorpusData = []; let regularRunningCorpus = 0; const annualInvestment = 0.6;
+                 for (let i = 0; i <= 25; i++) { regularCorpusData.push(regularRunningCorpus); if (i < 25) { regularRunningCorpus = (regularRunningCorpus + annualInvestment) * (1 + annualRate); } }
+                 const stepUpCorpusData = []; let stepUpRunningCorpus = 0; let stepUpAnnualInvestment = 0.6; const stepUpRate = 0.1;
+                 for (let i = 0; i <= 25; i++) { stepUpCorpusData.push(stepUpRunningCorpus); if (i < 25) { stepUpRunningCorpus = (stepUpRunningCorpus + stepUpAnnualInvestment) * (1 + annualRate); stepUpAnnualInvestment *= (1 + stepUpRate); } }
+                charts.stepUpComparisonChart = new Chart(stepUpComparisonCtx, {
+                    type: 'line',
+                    data: { labels: years, datasets: [{ label: {en: 'Step-Up SIP Corpus (₹ Crores)', mr: 'स्टेप-अप SIP निधी (₹ कोटी)'}[currentLanguage], data: stepUpCorpusData.map(v => (v / 100).toFixed(2)), borderColor: '#FBAF00', tension: 0.4, borderWidth: 3 }, { label: {en: 'Regular SIP Corpus (₹ Crores)', mr: 'नियमित SIP निधी (₹ कोटी)'}[currentLanguage], data: regularCorpusData.map(v => (v / 100).toFixed(2)), borderColor: '#0582CA', tension: 0.4, borderWidth: 3, borderDash: [5, 5] }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: {en: 'Corpus (in ₹ Crores)', mr: 'निधी (₹ कोटींमध्ये)'}[currentLanguage] } } } }
+                });
+            }
+
+            const drawdownCtx = document.getElementById('drawdownChart')?.getContext('2d');
+            if(drawdownCtx) {
+                const drawdownData = Array.from({length: 50}, () => Math.random() * -65);
+                charts.drawdownChart = new Chart(drawdownCtx, {
+                    type: 'bar',
+                    data: { labels: Array.from({length: 50}, (_, i) => 2000 + i/2), datasets: [{ label: {en: 'Monthly Drawdown (%)', mr: 'मासिक घट (%)'}[currentLanguage], data: drawdownData, backgroundColor: drawdownData.map(d => d < -40 ? '#FD5900' : '#0582CA'), borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: {en: 'Market Drawdown (%)', mr: 'बाजारातील घट (%)'}[currentLanguage] } } } }
+                });
+            }
+        };
+
+        const renderMarketUncertaintyCharts = () => {
+            if (charts.uncertaintyChart) charts.uncertaintyChart.destroy();
+            if (charts.marketTimingChart) charts.marketTimingChart.destroy();
+            if (charts.eventReturnsChart) charts.eventReturnsChart.destroy();
+            if (charts.behaviouralGapChart) charts.behaviouralGapChart.destroy();
+            
+            const uncertaintyChartCtx = document.getElementById('uncertaintyChart')?.getContext('2d');
+            if(uncertaintyChartCtx) {
+                const uncertaintyXLabels = ['1995', '1998', '2001', '2003', '2008', '2010', '2012', '2016', '2020', '2022', '2024'];
+                const uncertaintyAnnotations = {
+                    en: [ { label: '9/11 Terror Attacks', x: '2001', y: 270 }, { label: 'Global Financial Crisis', x: '2008', y: 250 }, { label: 'Sovereign Debt Crises', x: '2012', y: 260 }, { label: 'Covid', x: '2020', y: 450 }, { label: 'Trump', x: '2024', y: 370 } ],
+                    mr: [ { label: '९/११ दहशतवादी हल्ले', x: '2001', y: 270 }, { label: 'जागतिक आर्थिक संकट', x: '2008', y: 250 }, { label: 'सार्वभौम कर्ज संकट', x: '2012', y: 260 }, { label: 'कोविड', x: '2020', y: 450 }, { label: 'ट्रम्प', x: '2024', y: 370 } ]
+                }[currentLanguage];
+
+                charts.uncertaintyChart = new Chart(uncertaintyChartCtx, {
+                    type: 'line',
+                    data: { 
+                        labels: uncertaintyXLabels, 
+                        datasets: [{ 
+                            label: {en: 'Economic Policy Uncertainty Index', mr: 'आर्थिक धोरण अनिश्चितता निर्देशांक'}[currentLanguage], 
+                            data: [100, 80, 270, 150, 250, 200, 260, 100, 450, 150, 370], 
+                            borderColor: '#444e86', 
+                            backgroundColor: 'rgba(68, 78, 134, 0.1)',
+                            fill: true, 
+                            tension: 0.4 
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { display: false } 
+                        },
+                        scales: {
+                            y: { max: 550 }
+                        }
+                    },
+                    plugins: [{
+                        id: 'customAnnotations',
+                        afterDraw: chart => {
+                            const ctx = chart.ctx;
+                            const xAxis = chart.scales.x;
+                            const yAxis = chart.scales.y;
+                            
+                            uncertaintyAnnotations.forEach(ann => {
+                                const xPixel = xAxis.getPixelForValue(uncertaintyXLabels.indexOf(ann.x));
+                                const yPixel = yAxis.getPixelForValue(ann.y);
+
+                                if (isNaN(xPixel) || isNaN(yPixel)) return;
+
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.moveTo(xPixel, yAxis.bottom);
+                                ctx.lineTo(xPixel, yPixel + 10);
+                                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                                ctx.setLineDash([6, 6]);
+                                ctx.stroke();
+                                ctx.restore();
+
+                                const textContent = wrapLabel(ann.label, 16);
+                                const lines = Array.isArray(textContent) ? textContent : [textContent];
+                                const textMetrics = lines.map(line => ctx.measureText(line));
+                                const textWidth = Math.max(...textMetrics.map(m => m.width));
+                                const textHeight = lines.length * 16;
+
+                                ctx.save();
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                                ctx.fillRect(xPixel - textWidth / 2 - 5, yPixel - textHeight - 12, textWidth + 10, textHeight + 10);
+                                
+                                ctx.fillStyle = '#003f5c';
+                                ctx.font = 'bold 12px Inter';
+                                ctx.textAlign = 'center';
+                                lines.forEach((line, i) => {
+                                    ctx.fillText(line, xPixel, yPixel - textHeight + (i * 16) - 2);
+                                });
+                                ctx.restore();
+                            });
+                        }
+                    }]
+                });
+            }
+
+            const marketTimingChartCtx = document.getElementById('marketTimingChart')?.getContext('2d');
+            if(marketTimingChartCtx) {
+                const marketTimingLabels = { en: ['Stayed Invested Throughout', 'Missed 5 Best Days', 'Missed 10 Best Days', 'Missed 20 Best Days'], mr: ['पूर्णपणे गुंतवलेले राहिले', '५ सर्वोत्तम दिवस चुकवले', '१० सर्वोत्तम दिवस चुकवले', '२० सर्वोत्तम दिवस चुकवले'] };
+                charts.marketTimingChart = new Chart(marketTimingChartCtx, {
+                    type: 'line',
+                    data: { labels: ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'], datasets: [ { label: marketTimingLabels[currentLanguage][0], data: [100000, 125000, 140000, 160000, 155000, 220000, 250000, 280000, 317000], borderColor: '#003f5c', tension: 0.3, borderWidth: 4 }, { label: marketTimingLabels[currentLanguage][1], data: [100000, 118000, 130000, 145000, 120000, 160000, 180000, 205000, 232000], borderColor: '#955196', tension: 0.3, borderDash: [5, 5] }, { label: marketTimingLabels[currentLanguage][2], data: [100000, 112000, 125000, 130000, 90000, 135000, 150000, 170000, 190000], borderColor: '#ff6e54', tension: 0.3, borderDash: [5, 5] }, { label: marketTimingLabels[currentLanguage][3], data: [100000, 108000, 115000, 120000, 70000, 105000, 120000, 130000, 140000], borderColor: '#ffa600', tension: 0.3, borderDash: [5, 5] } ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: function(value) { return '₹' + (value / 100000).toFixed(2) + 'L'; } } } }, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+            
+            const eventReturnsCtx = document.getElementById('eventReturnsChart')?.getContext('2d');
+            if(eventReturnsCtx) {
+                const eventLabels = { en: [ 'Brexit', 'COVID-19', 'Pulwama Attack', 'Balakot Strike', 'India China skirmish', 'US Afghan Withdrawal', 'Russia Ukraine War', 'Attack on Israel', 'Israel Hamas Attack', 'Tariff War' ], mr: [ 'ब्रेक्झिट', 'कोविड-१९', 'पुलवामा हल्ला', 'बालाकोट स्ट्राइक', 'भारत चीन संघर्ष', 'यूएस अफगाण माघार', 'रशिया युक्रेन युद्ध', 'इस्त्रायलवर हल्ला', 'इस्त्रायल हमास हल्ला', 'टेरिफ युद्ध' ] };
+                const indexLabels = { en: ['Nifty 100 TRI', 'Nifty Midcap 150 TRI', 'Nifty Small Cap 250 TRI', 'Nifty Large Midcap 250'], mr: ['निफ्टी १०० टीआरआय', 'निफ्टी मिड कॅप १५० टीआरआय', 'निफ्टी स्मॉल कॅप २५० टीआरआय', 'निफ्टी लार्ज मिड कॅप २५०']};
+                charts.eventReturnsChart = new Chart(eventReturnsCtx, {
+                    type: 'bar',
+                    data: { labels: eventLabels[currentLanguage].map(l => wrapLabel(l, 16)), datasets: [ { label: indexLabels[currentLanguage][0], data: [14.8, 26.9, 15.6, 15.5, 21.6, 17.8, 15.3, 17.7, 19.7, 12.0], backgroundColor: '#003f5c', }, { label: indexLabels[currentLanguage][1], data: [20.1, 37.8, 23.8, 23.6, 32.7, 27.1, 26.3, 24.0, 27.2, 19.2], backgroundColor: '#7a5195', }, { label: indexLabels[currentLanguage][2], data: [17.6, 40.8, 23.7, 23.3, 35.6, 28.2, 24.9, 22.6, 25.7, 21.4], backgroundColor: '#ef5675', }, { label: indexLabels[currentLanguage][3], data: [17.5, 32.4, 19.8, 19.6, 27.2, 22.5, 20.8, 21.0, 23.6, 15.6], backgroundColor: '#ffa600', } ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: {en: 'Return CAGR (%)', mr: 'परतावा CAGR (%)'}[currentLanguage] } } }, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            const behaviouralGapChartCtx = document.getElementById('behaviouralGapChart')?.getContext('2d');
+            if(behaviouralGapChartCtx) {
+                const gapLabels = { en: ['Investor Expectations', 'Reality'], mr: ['गुंतवणूकदाराच्या अपेक्षा', 'वास्तव'] };
+                charts.behaviouralGapChart = new Chart(behaviouralGapChartCtx, {
+                    type: 'line',
+                    data: { labels: Array.from({length: 11}, (_, i) => `${translations[currentLanguage].fdd_swp_year_label || 'Year'} ${i}`), datasets: [ { label: gapLabels[currentLanguage][0], data: [10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120], borderColor: '#ffa600', fill: 'origin', tension: 0.4 }, { label: gapLabels[currentLanguage][1], data: [10, 15, 25, 20, 35, 45, 38, 55, 60, 50, 75], borderColor: '#444e86', fill: 'origin', tension: 0.4 } ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+        };
+        
+        const renderMutualFundsCharts = () => {
+            if (charts.diversificationChart) charts.diversificationChart.destroy();
+            if (charts.riskReturnChart) charts.riskReturnChart.destroy();
+            if (charts.hybridAllocationChart) charts.hybridAllocationChart.destroy();
+            if (charts.navGrowthChart) charts.navGrowthChart.destroy();
+
+            const diversificationCtx = document.getElementById('diversificationChart')?.getContext('2d');
+            if(diversificationCtx) {
+                const diversificationLabels = { en: ['Company A Stock', 'Company B Stock', 'Company C Stock', 'Government Bonds', 'Corporate Bonds', 'Other Assets'], mr: ['कंपनी A स्टॉक', 'कंपनी B स्टॉक', 'कंपनी C स्टॉक', 'सरकारी बॉण्ड्स', 'कॉर्पोरेट बॉण्ड्स', 'इतर मालमत्ता'] };
+                charts.diversificationChart = new Chart(diversificationCtx, {
+                    type: 'doughnut',
+                    data: { labels: diversificationLabels[currentLanguage], datasets: [{ label: {en: 'Portfolio Allocation', mr: 'पोर्टफोलिओ वाटप'}[currentLanguage], data: [15, 20, 10, 25, 20, 10], backgroundColor: [ '#0A9396', '#EE9B00', '#005F73', '#94D2BD', '#CA6702', '#E9D8A6' ], borderColor: '#ffffff', borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            const riskReturnCtx = document.getElementById('riskReturnChart')?.getContext('2d');
+            if(riskReturnCtx) {
+                const riskReturnLabels = { en: ['Debt Funds', 'Hybrid Funds', 'Large-Cap Equity', 'Mid-Cap Equity', 'Small-Cap Equity'], mr: ['डेट फंड', 'हायब्रीड फंड', 'लार्ज-कॅप इक्विटी', 'मिड-कॅप इक्विटी', 'स्मॉल-कॅप इक्विटी'] };
+                charts.riskReturnChart = new Chart(riskReturnCtx, {
+                    type: 'bar',
+                    data: { labels: riskReturnLabels[currentLanguage].map(l => wrapLabel(l, 16)), datasets: [{ label: {en: 'Potential Risk/Return Level', mr: 'संभाव्य धोका/परतावा स्तर'}[currentLanguage], data: [2, 4, 6, 8, 10], backgroundColor: [ '#94D2BD', '#0A9396', '#005F73', '#EE9B00', '#AE2012' ] }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, title: { display: true, text: {en: 'Level (Lower to Higher)', mr: 'स्तर (कमी ते जास्त)'}[currentLanguage] } } }, plugins: { legend: { display: false } } }
+                });
+            }
+
+            const hybridAllocationCtx = document.getElementById('hybridAllocationChart')?.getContext('2d');
+            if(hybridAllocationCtx) {
+                const hybridLabels = { en: ['Conservative', 'Balanced', 'Aggressive'], mr: ['पुराणमतवादी', 'संतुलित', 'आक्रमक'] };
+                const debtEquityLabels = { en: ['Debt', 'Equity'], mr: ['डेट', 'इक्विटी'] };
+                charts.hybridAllocationChart = new Chart(hybridAllocationCtx, {
+                    type: 'bar',
+                    data: { labels: hybridLabels[currentLanguage], datasets: [ { label: debtEquityLabels[currentLanguage][0], data: [70, 50, 30], backgroundColor: '#0A9396', }, { label: debtEquityLabels[currentLanguage][1], data: [30, 50, 70], backgroundColor: '#EE9B00', } ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: {en: '% Allocation', mr: '% वाटप'}[currentLanguage] } } }, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            const navGrowthCtx = document.getElementById('navGrowthChart')?.getContext('2d');
+            if(navGrowthCtx) {
+                const yearLabels = Array.from({ length: 7 }, (_, i) => `${translations[currentLanguage].fdd_swp_year_label || 'Year'} ${i + 1}`);
+                charts.navGrowthChart = new Chart(navGrowthCtx, {
+                    type: 'line',
+                    data: { labels: yearLabels, datasets: [{ label: {en: 'NAV (in ₹)', mr: 'NAV (₹ मध्ये)'}[currentLanguage], data: [10, 11.5, 13, 12.5, 15, 18, 22], borderColor: '#005F73', backgroundColor: 'rgba(10, 147, 150, 0.1)', fill: true, tension: 0.3 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, title: { display: true, text: {en: 'Net Asset Value (NAV)', mr: 'नेट अॅसेट व्हॅल्यू (NAV)'}[currentLanguage] } } }, plugins: { legend: { display: false } } }
+                });
+            }
+        };
+
+
+        // --- TAB SWITCHING LOGIC ---
+        const tabs = document.querySelectorAll('.tab-button');
+        const pages = document.querySelectorAll('.page');
+
+        const switchTab = (tabId, setActive = true) => {
+            const pageId = tabId.replace('tab-', '') + 'Page';
+            
+            if (setActive) {
+                window.scrollTo(0, 0); // Scroll to top on tab click
+                tabs.forEach(t => t.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                pages.forEach(p => p.classList.remove('active'));
+                const activePage = document.getElementById(pageId);
+                if(activePage) activePage.classList.add('active');
+            }
+            
+            // Destroy all existing charts before rendering new ones
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            charts = {};
+
+
+            if (pageId === 'raceToWealthPage') {
+                renderCagrChart();
+                renderAnnualReturnsChart();
+                renderRiskProfileChart();
+                populateDataTable();
+            } else if (pageId === 'fdVsDebtPage') {
+                renderFdDebtCharts();
+            } else if (pageId === 'theMagicPage') {
+                renderTheMagicCharts();
+            } else if (pageId === 'marketUncertaintyPage') {
+                renderMarketUncertaintyCharts();
+            } else if (pageId === 'mutualFundsExplainedPage') {
+                renderMutualFundsCharts();
+            }
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.id));
+        });
+
+        // --- INITIAL LOAD & LANGUAGE TOGGLE EVENT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const langToggleButton = document.getElementById('lang-toggle');
+            
+            currentLanguage = 'en';
+            translatePage(currentLanguage);
+            langToggleButton.textContent = 'मराठी';
+
+            langToggleButton.addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'en' ? 'mr' : 'en';
+                translatePage(currentLanguage);
+                langToggleButton.textContent = currentLanguage === 'en' ? 'मराठी' : 'English';
+            });
+
+            switchTab('tab-mutualFundsExplained');
+        });
+    </script>
+
+</body>
+</html>
